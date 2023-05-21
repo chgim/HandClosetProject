@@ -9,7 +9,12 @@ const getClothesByCategoryAndSubcategory = (category, subcategory) => {
             },
         })
         .then((response) => {
-            return response.data;
+            // 이미지 파일 경로를 가져오기 위해 응답 데이터를 가공합니다.
+            const clothesWithImageUrls = response.data.map((clothes) => ({
+                ...clothes,
+                image: `/api/clothing/images/${clothes.id}`,
+            }));
+            return clothesWithImageUrls;
         });
 };
 

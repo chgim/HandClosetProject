@@ -1,46 +1,19 @@
-//package HandCloset.HandCloset.service;
-//
-//import HandCloset.HandCloset.entity.Clothes;
-//import HandCloset.HandCloset.repository.ClothesRepository;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.List;
-//
-//@Service
-//public class ClothesService {
-//    private final ClothesRepository clothesRepository;
-//
-//    public ClothesService(ClothesRepository clothesRepository) {
-//        this.clothesRepository = clothesRepository;
-//    }
-//
-//    public Clothes saveClothes(Clothes clothes) {
-//        return clothesRepository.save(clothes);
-//    }
-//
-//    public Clothes getClothes(Long id) {
-//        return clothesRepository.findById(id).orElse(null);
-//    }
-//
-//    public List<Clothes> getAllClothes() {
-//        return (List<Clothes>) clothesRepository.findAll();
-//    }
-//
-//    public void deleteClothes(Long id) {
-//        clothesRepository.deleteById(id);
-//    }
-//}
 
 package HandCloset.HandCloset.service;
-
+import org.springframework.beans.factory.annotation.Value;
 import HandCloset.HandCloset.entity.Clothes;
 import HandCloset.HandCloset.repository.ClothesRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @Service
 public class ClothesService {
+    @Value("${upload.directory}")
+    private String uploadDirectory;
     private final ClothesRepository clothesRepository;
 
     public ClothesService(ClothesRepository clothesRepository) {
@@ -73,5 +46,17 @@ public class ClothesService {
 
     public List<Clothes> getClothesByCategoryAndSubcategory(String category, String subcategory) {
         return clothesRepository.findByCategoryAndSubcategory(category, subcategory);
+    }
+    public String saveImage(MultipartFile file) {
+        try {
+            // 이미지를 파일 시스템에 저장하고 저장된 경로를 반환합니다.
+            String filePath = uploadDirectory + File.separator + file.getOriginalFilename();
+            file.transferTo(new File(filePath));
+            return filePath;
+        } catch (IOException e) {
+            // 예외 처리
+            e.printStackTrace();
+            return null;
+        }
     }
 }

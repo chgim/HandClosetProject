@@ -4,9 +4,17 @@ package HandCloset.HandCloset.controller;
 import HandCloset.HandCloset.entity.Clothes;
 import HandCloset.HandCloset.service.ClothesService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/clothing")
@@ -19,13 +27,15 @@ public class ClothesController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Clothes saveClothes(@RequestPart String imgurl,
-                               @RequestPart String category,
-                               @RequestPart String subcategory,
-                               @RequestPart String season,
-                               @RequestPart(required = false) String description) {
+    public Clothes saveClothes(@RequestParam("file") MultipartFile file,
+                               @RequestParam("category") String category,
+                               @RequestParam("subcategory") String subcategory,
+                               @RequestParam("season") String season,
+                               @RequestParam(value = "description", required = false) String description) {
         Clothes clothes = new Clothes();
-        clothes.setImgUrl(imgurl);
+        // 파일을 저장하고 저장된 경로를 DB에 저장합니다.
+        String imagePath = clothesService.saveImage(file);
+        clothes.setImgPath(imagePath);
         clothes.setCategory(category);
         clothes.setSubcategory(subcategory);
         clothes.setSeason(season);
@@ -62,5 +72,13 @@ public class ClothesController {
         } else {
             return clothesService.getClothesByCategoryAndSubcategory(category, subcategory);
         }
+    }
+    //////////////////////////////////////////////////////////////////////
+    @GetMapping(value = "/images/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public byte[] getClothesImage(@PathVariable Long id) throws IOException {
+        Clothes clothes = clothesService.getClothes(id);
+        String imgPath = clothes.getImgPath();
+        Path imgpath = Paths.get(imgPath);
+        return Files.readAllBytes(imgpath);
     }
 }

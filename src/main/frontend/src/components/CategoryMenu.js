@@ -27,7 +27,10 @@ const categories = [
       "기타",
     ],
   },
-
+  {
+    name: "원피스",
+    subcategories: ["미니 원피스", "미디 원피스", "맥시 원피스", "기타"],
+  },
   {
     name: "신발",
     subcategories: ["운동화", "구두", "부츠", "샌들", "기타"],
