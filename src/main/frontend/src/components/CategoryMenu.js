@@ -1,7 +1,9 @@
-
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { getClothesByCategoryAndSubcategory } from "../utils/api";
+import {
+  getClothesByCategoryAndSubcategory,
+  getAllClothesImages,
+} from "../utils/api";
 
 const categories = [
   {
@@ -61,23 +63,31 @@ function CategoryMenu({ onClickCategory }) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (activeCategory && activeSubcategory) {
-      setIsLoading(true);
+    setIsLoading(true);
+    if (activeCategory === "전체") {
+      getAllClothesImages()
+        .then((clothes) => {
+          onClickCategory(activeCategory, activeSubcategory, clothes);
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => setIsLoading(false));
+    } else {
       getClothesByCategoryAndSubcategory(activeCategory, activeSubcategory)
-          .then((clothesWithImageUrls) => {
-            onClickCategory(activeCategory, activeSubcategory, clothesWithImageUrls);
-          })
-          .catch((error) => {
-            if (error.response && error.response.status === 404) {
-              alert("해당하는 데이터가 없습니다.");
-            } else {
-              console.error(error);
-            }
-          })
-          .finally(() => setIsLoading(false));
+        .then((clothesWithImageUrls) => {
+          onClickCategory(
+            activeCategory,
+            activeSubcategory,
+            clothesWithImageUrls
+          );
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => setIsLoading(false));
     }
   }, [activeCategory, activeSubcategory, onClickCategory]);
-
   const handleClickCategory = (categoryName) => {
     setActiveCategory(categoryName);
     setActiveSubcategory("");
@@ -86,39 +96,36 @@ function CategoryMenu({ onClickCategory }) {
   const handleClickSubcategory = (subcategoryName) => {
     setActiveSubcategory(subcategoryName);
   };
-
-
-
   return (
-      <div>
-        <StyledHeader>
-          <ol>
-            {categories.map((category) => (
-                <li
-                    key={category.name}
-                    className={activeCategory === category.name ? "active" : ""}
-                    onClick={() => handleClickCategory(category.name)}
-                >
-                  {category.name}
-                </li>
+    <div>
+      <StyledHeader>
+        <ol>
+          {categories.map((category) => (
+            <li
+              key={category.name}
+              className={activeCategory === category.name ? "active" : ""}
+              onClick={() => handleClickCategory(category.name)}
+            >
+              {category.name}
+            </li>
+          ))}
+        </ol>
+        <ul>
+          {categories
+            .find((category) => category.name === activeCategory)
+            .subcategories.map((subcategory) => (
+              <li
+                key={subcategory}
+                className={activeSubcategory === subcategory ? "active" : ""}
+                onClick={() => handleClickSubcategory(subcategory)}
+              >
+                {subcategory}
+              </li>
             ))}
-          </ol>
-          <ul>
-            {categories
-                .find((category) => category.name === activeCategory)
-                .subcategories.map((subcategory) => (
-                    <li
-                        key={subcategory}
-                        className={activeSubcategory === subcategory ? "active" : ""}
-                        onClick={() => handleClickSubcategory(subcategory)}
-                    >
-                      {subcategory}
-                    </li>
-                ))}
-          </ul>
-          {isLoading && <div>Loading...</div>}
-        </StyledHeader>
-      </div>
+        </ul>
+        {isLoading && <div>Loading...</div>}
+      </StyledHeader>
+    </div>
   );
 }
 
