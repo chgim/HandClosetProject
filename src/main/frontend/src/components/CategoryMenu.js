@@ -123,7 +123,6 @@ function CategoryMenu({ onClickCategory }) {
               </li>
             ))}
         </ul>
-        {isLoading && <div>Loading...</div>}
       </StyledHeader>
     </div>
   );

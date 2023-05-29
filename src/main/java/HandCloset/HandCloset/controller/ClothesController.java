@@ -87,50 +87,6 @@ public class ClothesController {
         return Files.readAllBytes(imagePath);
     }
 
-//    @GetMapping(value = "/images/all")
-//    public List<String> getAllClothesImageUrls() {
-//        List<String> allImageUrls = new ArrayList<>();
-//
-//        // 데이터베이스에서 이미지 파일 경로를 가져옴
-//        List<Clothes> clothesList = clothesService.getAllClothes();
-//        for (Clothes clothes : clothesList) {
-//            String imageUrl = getImageUrlFromPath(clothes.getImgPath());
-//            allImageUrls.add(imageUrl);
-//        }
-//
-//        return allImageUrls;
-//    }
-//
-//    private String getImageUrlFromPath(String imagePath) {
-//        File imageFile = new File(imagePath);
-//        if (imageFile.exists()) {
-//            return "data:image/jpeg;base64," + encodeImageToBase64(imageFile);
-//        }
-//        return "";
-//    }
-//
-//    private String encodeImageToBase64(File imageFile) {
-//        try {
-//            byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
-//            return Base64.getEncoder().encodeToString(imageBytes);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return "";
-//    }
-//    @GetMapping("/images/all")
-//    public List<String> getAllClothesImagePaths() {
-//        List<String> allImagePaths = new ArrayList<>();
-//
-//        // 데이터베이스에서 이미지 파일 경로를 가져옴
-//        List<Clothes> clothesList = clothesService.getAllClothes();
-//        for (Clothes clothes : clothesList) {
-//            String imagePath = clothes.getImgPath();
-//            allImagePaths.add(imagePath);
-//        }
-//
-//        return allImagePaths;
-//    }
     @GetMapping("/images/all")
     public List<byte[]> getAllClothesImagePaths() throws IOException {
         List<byte[]> allImages = new ArrayList<>();
