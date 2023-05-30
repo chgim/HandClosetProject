@@ -8,6 +8,7 @@ import Closet from "./pages/Closet";
 import ClothingForm from "./pages/ClothingForm";
 import BottomNav from "./BottomNav";
 import styled from "styled-components";
+import ClothesDetail from "./pages/ClothesDetail";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/MyPage" element={<MyPage />} />
         <Route path="/Closet" element={<Closet />} />
         <Route path="/ClothingForm" element={<ClothingForm />} />
+        <Route path="/clothes/:id" element={<ClothesDetail />} />
       </Routes>
     </div>
   );

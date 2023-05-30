@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { getAllClothesImages } from "../utils/api";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 function CategoryItem({ category, subcategory, items }) {
   const [images, setImages] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -18,11 +20,15 @@ function CategoryItem({ category, subcategory, items }) {
     fetchImages();
   }, []);
 
+  const handleClickImage = (item) => {
+    // 해당 이미지의 정보를 보여주는 경로로 이동합니다.
+    navigate(`/clothes/${item.id}`);
+  };
   return (
     <div>
       <ImageGrid>
         {items.map((item, index) => (
-          <ImageItem key={item.id}>
+          <ImageItem key={item.id} onClick={() => handleClickImage(item)}>
             {category === "전체" ? (
               <ItemImage
                 src={`data:image/jpeg;base64,${images[index]}`}

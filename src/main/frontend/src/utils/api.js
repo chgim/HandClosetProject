@@ -18,5 +18,10 @@ const getAllClothesImages = () => {
     return response.data;
   });
 };
+const getClothes = (id) => {
+  return axios.get(`/api/clothing/${id}`).then((response) => {
+    return response.data;
+  });
+};
 
-export { getClothesByCategoryAndSubcategory, getAllClothesImages };
+export { getClothesByCategoryAndSubcategory, getAllClothesImages, getClothes };
