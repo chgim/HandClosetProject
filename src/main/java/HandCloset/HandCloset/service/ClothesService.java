@@ -8,6 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +65,6 @@ public class ClothesService {
         }
     }
 
-    ////
 
     public Map<String, Integer> getCategoryItemCountForClothes() {
         List<Clothes> allClothes = clothesRepository.findAll();
@@ -77,5 +79,32 @@ public class ClothesService {
 
         return itemCountMap;
     }
-    ////
+
+
+
+    public Map<String, Integer> getSeasonStatistics() {
+        List<Clothes> clothesList = clothesRepository.findAll();
+        Map<String, Integer> statistics = new HashMap<>();
+
+        for (Clothes clothes : clothesList) {
+            String[] seasons = clothes.getSeason().split(",");
+            for (String season : seasons) {
+                statistics.put(season, statistics.getOrDefault(season, 0) + 1);
+            }
+        }
+
+        return statistics;
+    }
+
+    public List<Clothes> getTopItems() {
+        return clothesRepository.findTop5ByOrderByWearcntDesc();
+    }
+    public byte[] getClothesImageByPath(String imgPath) throws IOException {
+        Path imagePath = Paths.get(imgPath);
+        return Files.readAllBytes(imagePath);
+    }
+
+    public List<Clothes> getBottomItems() {
+        return clothesRepository.findTop5ByOrderByCreatedateAsc();
+    }
 }

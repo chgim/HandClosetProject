@@ -6,7 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
 @Table(name = "clothes")
@@ -30,6 +32,22 @@ public class Clothes {
     private String season;
 
     private String description;
+
+
+    @Column(nullable = false)
+    private int wearcnt = ThreadLocalRandom.current().nextInt(11);
+
+
+    @Column(nullable = false)
+    private Date createdate = getRandomDate();
+
+
+    private Date getRandomDate() {
+        long minDay = new Date(123, 4, 15).getTime();
+        long maxDay = new Date(123, 4, 31).getTime();
+        long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
+        return new Date(randomDay);
+    }
 
     public Long getId() {
         return id;
@@ -77,5 +95,21 @@ public class Clothes {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getWearcnt() {
+        return wearcnt;
+    }
+
+    public void setWearcnt(int wearcnt) {
+        this.wearcnt = wearcnt;
+    }
+
+    public Date getCreatedate() {
+        return createdate;
+    }
+
+    public void setCreatedate(Date createdate) {
+        this.createdate = createdate;
     }
 }

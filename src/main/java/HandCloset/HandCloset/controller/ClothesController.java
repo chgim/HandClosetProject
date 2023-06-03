@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
+
 
 @RestController
 @RequestMapping("/api/clothing")
@@ -80,7 +82,7 @@ public class ClothesController {
             return clothesService.getClothesByCategoryAndSubcategory(category, subcategory);
         }
     }
-
+    //카테고리에 맞는 이미지 가져오기
     @GetMapping(value = "/images/{id}", produces = MediaType.IMAGE_JPEG_VALUE) //이미지의 경로를 통해 단일 이미지를 가져옴
     public byte[] getClothesImage(@PathVariable Long id) throws IOException {
         Clothes clothes = clothesService.getClothes(id);
@@ -88,7 +90,7 @@ public class ClothesController {
         Path imagePath = Paths.get(imgPath);
         return Files.readAllBytes(imagePath);
     }
-
+    //전체 이미지 가져오기
     @GetMapping("/images/all")
     public List<byte[]> getAllClothesImagePaths() throws IOException {
         List<byte[]> allImages = new ArrayList<>();
@@ -104,12 +106,34 @@ public class ClothesController {
 
         return allImages;
     }
-    //
+    //통계 
     @GetMapping("/category-item-count")
     public ResponseEntity<Map<String, Integer>> getCategoryItemCountForClothes() {
         Map<String, Integer> itemCountMap = clothesService.getCategoryItemCountForClothes();
         return ResponseEntity.ok(itemCountMap);
     }
 
-    //
+    @GetMapping("/statistics")
+    public Map<String, Integer> getSeasonStatistics() {
+        return clothesService.getSeasonStatistics();
+    }
+
+    @GetMapping("/top-items")
+    public List<Clothes> getTopItems() {
+        return clothesService.getTopItems();
+    }
+    @GetMapping("/bottom-items")
+    public List<Clothes> getBottomItems() {
+        return clothesService.getBottomItems();
+    }
+
+    @GetMapping(value = "/images-by-path/{imgPath}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getClothesImageByPath(@PathVariable String imgPath) throws IOException {
+        byte[] imageBytes = clothesService.getClothesImageByPath(imgPath);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+    }
+
+
 }
