@@ -1,84 +1,33 @@
 
-// import React, { useEffect, useState } from "react";
-// import axios from 'axios';
-//
-// const Main = () => {
-//     const [latitude, setLatitude] = useState(null);
-//     const [longitude, setLongitude] = useState(null);
-//     const [statistics, setStatistics] = useState([]);
-//
-//     useEffect(() => {
-//         if (navigator.geolocation) {
-//             navigator.geolocation.getCurrentPosition(
-//                 (position) => {
-//                     setLatitude(position.coords.latitude);
-//                     setLongitude(position.coords.longitude);
-//                 },
-//                 (error) => {
-//                     console.error("Error getting geolocation:", error);
-//                 }
-//             );
-//         } else {
-//             console.error("Geolocation is not supported by this browser.");
-//         }
-//     }, []);
-//
-//     useEffect(() => {
-//         const fetchStatistics = async () => {
-//             try {
-//                 const response = await axios.get("/api/clothing/category-item-count");
-//                 const data = response.data;
-//                 setStatistics(Object.entries(data));
-//             } catch (error) {
-//                 console.error("Error fetching statistics:", error);
-//             }
-//         };
-//
-//         fetchStatistics();
-//     }, []);
-//
-//     const categories = [
-//         { name: "상의", subcategories: ["민소매", "반팔티", "긴팔티", "블라우스/셔츠", "맨투맨/후디", "니트", "기타"] },
-//         { name: "하의", subcategories: ["반바지", "치마", "면바지", "슬랙스", "청바지", "트레이닝/조거", "기타"] },
-//         { name: "아우터", subcategories: ["트렌치 코드", "코트", "자켓/점퍼", "야상", "무스탕", "패딩", "후드집업", "가디건/베스트", "기타"] },
-//         { name: "원피스", subcategories: ["미니 원피스", "미디 원피스", "맥시 원피스", "기타"] },
-//         { name: "신발", subcategories: ["운동화", "구두", "부츠", "샌들", "기타"] },
-//         { name: "가방", subcategories: ["백팩", "숄더/토트백", "크로스백", "클러치", "기타"] },
-//         { name: "악세사리", subcategories: ["모자", "양말", "쥬얼리/시계", "머플러/스카프", "벨트", "기타"] },
-//         { name: "기타", subcategories: ["이너웨어", "잠옷", "수영복"] }
-//     ];
-//
-//     return (
-//         <div>
-//             <h1>Main</h1>
-//             {latitude && longitude && (
-//                 <p>
-//                     Your current location: {latitude}, {longitude}
-//                 </p>
-//             )}
-//
-//             <h2>Statistics</h2>
-//             <ul>
-//                 {categories.map((category) => (
-//                     <li key={category.name}>
-//                         {category.name}:{" "}
-//                         {category.subcategories.reduce((total, subcategory) => {
-//                             const categoryKey = category.name + "-" + subcategory;
-//                             const itemCount = statistics.find((item) => item[0] === categoryKey);
-//                             return total + (itemCount ? itemCount[1] : 0);
-//                         }, 0)}
-//                     </li>
-//                 ))}
-//             </ul>
-//         </div>
-//     );
-// };
-//
-// export default Main;
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 import axios from 'axios';
+//images
+import blanket from "../images/category/blanket.png";
+import cardigan from "../images/category/cardigan.png";
+import coat from "../images/category/coat.png";
+import cottonPants from "../images/category/cottonPants.png";
+import dress from "../images/category/dress.png";
+import fieldJacket from "../images/category/fieldJacket.png";
+import hoodedJacket from "../images/category/hoodedJacket.png";
+import muffler from "../images/category/muffler.png";
+import mustang from "../images/category/mustang.png";
+import neat from "../images/category/neat.png";
+import puffer from "../images/category/puffer.png";
+import shirt from "../images/category/shirt.png";
+import shorts from "../images/category/shorts.png";
+import shortSleeve from "../images/category/shortSleeve.png";
+import slacks from "../images/category/slacks.png";
+import sleeve from "../images/category/sleeve.png";
+import sleeveless from "../images/category/sleeveless.png";
+import stockings from "../images/category/stockings.png";
+import trenchCoat from "../images/category/trenchCoat.png";
+import jeans from "../images/category/jeans.png";
+import jacket from "../images/category/jacket.png";
+import mantoman from "../images/category/mantoman.png";
+
+
 const Main = () => {
   const navigate = useNavigate();
   const [latitude, setLatitude] = useState(null);
@@ -86,6 +35,8 @@ const Main = () => {
   const [cityCode, setCityCode] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
   const [koreanCityCode, setKoreanCityCode] = useState(null);
+  const [recommendedSubcategory, setRecommendedSubcategory] = useState([]);
+  const [recommendedCategoryImages, setRecommendedCategoryImages] = useState([]);
 
 
   useEffect(() => {
@@ -148,6 +99,26 @@ const Main = () => {
     }
   }, [cityCode]);
 
+  useEffect(() => {
+    // 기온에 따른 추천 서브 카테고리 설정
+    if (weatherData) {
+      const temperature = Math.round(weatherData.main.temp);
+      const strCategory = getRecommendedCategory(temperature);
+      const recommendedCategory = strCategory.split(",")
+      //
+
+      //
+      setRecommendedSubcategory(recommendedCategory);
+
+    }
+  }, [weatherData]);
+
+  useEffect(() => {
+    // 서브카테고리에 따른 이미지와 카테고리 이름을 업데이트합니다.
+    const categoryData = mapSubcategoryToData(recommendedSubcategory);
+    setRecommendedCategoryImages(categoryData);
+  }, [recommendedSubcategory]);
+
   const convertToEnglishCityCode = (koreanCityCode) => {
     const cityCodeMap = {
       "서울특별시": "Seoul",
@@ -177,26 +148,109 @@ const Main = () => {
 
   const getRecommendedCategory = (temperature) => {
     if (temperature >= 28) {
-      return "민소매, 반팔, 원피스, 반바지";
+      return "민소매,반팔티,원피스,반바지";
     } else if (temperature >= 23) {
-      return "반팔, 얇은 셔츠, 반바지, 면바지";
+      return "반팔티,셔츠,반바지,면바지";
     } else if (temperature >= 20) {
-      return "얇은 가디건, 긴팔, 면바지, 청바지";
+      return "가디건,긴팔티,면바지,청바지";
     } else if (temperature >= 17) {
-      return "얇은 니트, 맨투맨, 가디건, 청바지";
+      return "니트,맨투맨,가디건,청바지";
     } else if (temperature >= 12) {
-      return "자켓, 가디건, 후드집업, 스타킹";
+      return "자켓,가디건,후드집업,스타킹";
     } else if (temperature >= 9) {
-      return "자켓, 트렌치코트, 야상, 니트";
+      return "자켓,트렌치코드,야상,니트";
     } else if (temperature >= 5) {
-      return "코트, 무스탕, 니트, 레깅스";
+      return "코트,무스탕,니트,슬랙스";
     } else {
-      return "패딩, 두꺼운 코트, 목도리, 기모제품";
+      return "패딩,코트,목도리,기모제품";
     }
   };
+
+
+  const mapSubcategoryToData = (subcategories) => {
+    const categoryData = [];
+
+    subcategories.forEach((subcategory) => {
+      switch (subcategory.trim()) {
+        case "민소매":
+          categoryData.push({ subcategory: "민소매", image: sleeveless });
+          break;
+        case "반팔티":
+          categoryData.push({ subcategory: "반팔티", image: shortSleeve });
+          break;
+        case "긴팔티":
+          categoryData.push({ subcategory: "긴팔티", image: sleeve });
+          break;
+        case "원피스":
+          categoryData.push({ subcategory: "원피스", image: dress });
+          break;
+        case "반바지":
+          categoryData.push({ subcategory: "반바지", image: shorts });
+          break;
+        case "가디건":
+          categoryData.push({ subcategory: "가디건", image: cardigan });
+          break;
+        case "니트":
+          categoryData.push({ subcategory: "니트", image: neat });
+          break;
+        case "자켓":
+          categoryData.push({ subcategory: "자켓", image: jacket });
+          break;
+        case "코트":
+          categoryData.push({ subcategory: "코트", image: coat });
+          break;
+        case "패딩":
+          categoryData.push({ subcategory: "패딩", image: puffer });
+          break;
+        case "야상":
+          categoryData.push({ subcategory: "야상", image: fieldJacket });
+          break;
+        case "맨투맨":
+          categoryData.push({ subcategory: "맨투맨", image: mantoman });
+          break;
+        case "무스탕":
+          categoryData.push({ subcategory: "무스탕", image: mustang });
+          break;
+        case "셔츠":
+          categoryData.push({ subcategory: "셔츠", image: shirt });
+          break;
+        case "스타킹":
+          categoryData.push({ subcategory: "스타킹", image: stockings });
+          break;
+        case "트렌치코트":
+          categoryData.push({ subcategory: "트렌치코트", image: trenchCoat });
+          break;
+        case "슬랙스":
+          categoryData.push({ subcategory: "슬랙스", image: slacks });
+          break;
+        case "목도리":
+          categoryData.push({ subcategory: "목도리", image: muffler });
+          break;
+        case "후드집업":
+          categoryData.push({ subcategory: "후드집업", image: hoodedJacket });
+          break;
+        case "면바지":
+          categoryData.push({ subcategory: "면바지", image: cottonPants });
+          break;
+        case "기모제품":
+          categoryData.push({ subcategory: "기모제품", image: blanket });
+          break;
+        case "청바지":
+          categoryData.push({ subcategory: "청바지", image: jeans });
+          break;
+          // 다른 카테고리에 대한 이미지 처리...
+        default:
+          break;
+      }
+    });
+
+    return categoryData;
+  };
+
   return (
       <div>
-        <h1>Main</h1>
+        <Container>
+
         {latitude && longitude && cityCode && (
             <p>
               현재 도시: {cityCode}
@@ -211,24 +265,96 @@ const Main = () => {
               <p>구름: {weatherData.clouds.all}%</p>
               <p>풍속: {weatherData.wind.speed} m/s</p>
               <img src={getWeatherIconUrl(weatherData.weather[0].icon)} alt="Weather Icon" />
-              <p>옷 추천: {getRecommendedCategory(Math.round(weatherData.main.temp))}</p>
+
+              {recommendedCategoryImages.length > 0 && (
+                  <ImageContainer>
+                    {recommendedCategoryImages.map((categoryData, index) => (
+                        <div key={index}>
+                          <ImageWrapper>
+                          <img src={categoryData.image} alt="Recommended Clothing" />
+                          <p>{categoryData.subcategory}</p>
+                          </ImageWrapper>
+                        </div>
+                    ))}
+                  </ImageContainer>
+              )}
             </div>
         )}
-          <div onClick={() => {
-            navigate("/ItemHave");
-          }}><h3>옷장 속 가장 많은 아이템</h3></div>
-        <div onClick={() => {
-          navigate("/ItemSpring");
-        }}><h3>계절 별 아이템 </h3></div>
-        <div onClick={() => {
-          navigate("/ItemFrequently");
-        }}><h3>자주 입은 아이템</h3></div>
-        <div onClick={() => {
-          navigate("/ItemNotRecently");
-        }}><h3>최근 입지 않은 아이템</h3></div>
+        <div style={{backgroundColor:"#364054", borderRadius:"3px",width:"75%", padding:"3px", color:"white"}} onClick={() => {
+          navigate("/ClothingRecommendation", { state: { subcategories: recommendedSubcategory } });
+        }}><h4>오늘 입을 스타일을 추천 해줄게요!</h4></div>
 
+          <ButtonContainer>
+            <Button onClick={() => navigate("/ItemHave")}>
+              옷장 속 가장 많은<br/>아이템
+            </Button>
+            <Button onClick={() => navigate("/ItemSeason")}>
+              계절 별 아이템<br/>개수
+            </Button>
+            <Button onClick={() => navigate("/ItemFrequently")}>
+              가장 자주 입은<br/>아이템
+            </Button>
+            <Button onClick={() => navigate("/ItemNotRecently")}>
+              요즘 입지 않은<br/>아이템
+            </Button>
+          </ButtonContainer>
+
+          </Container>
       </div>
   );
 };
+const Container = styled.div`
+display: flex;
+flex-direction: column;
+align-items: center;
+`;
 
+const ButtonContainer = styled.div`
+  width:75%;
+  display: grid;
+grid-template-columns: repeat(2, 1fr);
+grid-gap: 20px;
+margin-top: 20px;
+`;
+
+const Button = styled.div`
+display: flex;
+justify-content: center;
+align-items: center;
+width: 100%;
+height: 100px;
+background-color: #EFEFEF;
+border-radius: 8px;
+color: black;
+cursor: pointer;
+transition: background-color 0.3s;
+font-size: 15px;  
+`;
+
+const ImageContainer = styled.div`
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 15px;
+    margin-top: 20px;
+    
+
+    img {
+      width: 65%;
+      height: auto;
+      opacity: 90%;
+    }
+
+    p {
+      text-align: center;
+      font-size: 15px;
+      padding-bottom: 10px;
+    }
+  `;
+const ImageWrapper=styled.div`
+  
+  border-radius: 5px;
+  padding-top: 10px;
+  box-shadow: 2px 2px 2px 2px #EFEFEF;
+  margin-bottom: 20px;
+`;
 export default Main;

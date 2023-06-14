@@ -5,7 +5,6 @@ import HandCloset.HandCloset.entity.Clothes;
 import HandCloset.HandCloset.repository.ClothesRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 @Service
 public class ClothesService {
@@ -80,7 +80,7 @@ public class ClothesService {
         return itemCountMap;
     }
 
-
+    ///
 
     public Map<String, Integer> getSeasonStatistics() {
         List<Clothes> clothesList = clothesRepository.findAll();
@@ -95,16 +95,24 @@ public class ClothesService {
 
         return statistics;
     }
-
     public List<Clothes> getTopItems() {
         return clothesRepository.findTop5ByOrderByWearcntDesc();
     }
-    public byte[] getClothesImageByPath(String imgPath) throws IOException {
-        Path imagePath = Paths.get(imgPath);
-        return Files.readAllBytes(imagePath);
-    }
+
 
     public List<Clothes> getBottomItems() {
         return clothesRepository.findTop5ByOrderByCreatedateAsc();
+    }
+    ///
+    public List<Clothes> getFilteredClothes(String subcategory) {
+        return clothesRepository.findBySubcategory(subcategory);
+    }
+
+    public List<Clothes> getRecommendedClothes(String subcategory) {
+        return clothesRepository.findTop2BySubcategoryOrderByWearcntDesc(subcategory);
+    }
+
+    public List<Clothes> getRecommendedClothesAsc(String subcategory) {
+        return clothesRepository.findTop2BySubcategoryOrderByWearcnt(subcategory);
     }
 }

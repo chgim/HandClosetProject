@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.util.Base64;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,12 +19,9 @@ import java.util.ArrayList;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import java.io.File;
 import java.util.Map;
-
+import java.net.URLDecoder;
 import org.springframework.http.HttpHeaders;
-
-
 @RestController
 @RequestMapping("/api/clothing")
 public class ClothesController {
@@ -47,7 +44,7 @@ public class ClothesController {
         Clothes clothes = new Clothes();
         // 파일을 저장하고 저장된 경로를 DB에 저장합니다.
         String imagePath = clothesService.saveImage(file);
-        clothes.setImgPath(imagePath);
+        clothes.setImgpath(imagePath);
         clothes.setCategory(category);
         clothes.setSubcategory(subcategory);
         clothes.setSeason(season);
@@ -82,15 +79,15 @@ public class ClothesController {
             return clothesService.getClothesByCategoryAndSubcategory(category, subcategory);
         }
     }
-    //카테고리에 맞는 이미지 가져오기
+    //CategoryItem
     @GetMapping(value = "/images/{id}", produces = MediaType.IMAGE_JPEG_VALUE) //이미지의 경로를 통해 단일 이미지를 가져옴
     public byte[] getClothesImage(@PathVariable Long id) throws IOException {
         Clothes clothes = clothesService.getClothes(id);
-        String imgPath = clothes.getImgPath();
-        Path imagePath = Paths.get(imgPath);
+        String imgpath = clothes.getImgpath();
+        Path imagePath = Paths.get(imgpath);
         return Files.readAllBytes(imagePath);
     }
-    //전체 이미지 가져오기
+    //CategoryItem
     @GetMapping("/images/all")
     public List<byte[]> getAllClothesImagePaths() throws IOException {
         List<byte[]> allImages = new ArrayList<>();
@@ -98,7 +95,7 @@ public class ClothesController {
         // 데이터베이스에서 이미지 파일 경로를 가져옴
         List<Clothes> clothesList = clothesService.getAllClothes();
         for (Clothes clothes : clothesList) {
-            String imagePath = clothes.getImgPath();
+            String imagePath = clothes.getImgpath();
             Path imageFilePath = Paths.get(imagePath);
             byte[] imageBytes = Files.readAllBytes(imageFilePath);
             allImages.add(imageBytes);
@@ -106,34 +103,54 @@ public class ClothesController {
 
         return allImages;
     }
-    //통계 
+    // ItemHave
     @GetMapping("/category-item-count")
     public ResponseEntity<Map<String, Integer>> getCategoryItemCountForClothes() {
         Map<String, Integer> itemCountMap = clothesService.getCategoryItemCountForClothes();
         return ResponseEntity.ok(itemCountMap);
     }
 
+    // ItemSpring
     @GetMapping("/statistics")
     public Map<String, Integer> getSeasonStatistics() {
         return clothesService.getSeasonStatistics();
     }
 
+    // ItemFrequently
     @GetMapping("/top-items")
     public List<Clothes> getTopItems() {
         return clothesService.getTopItems();
     }
+
+    // ItemNotRecently
     @GetMapping("/bottom-items")
     public List<Clothes> getBottomItems() {
         return clothesService.getBottomItems();
     }
 
-    @GetMapping(value = "/images-by-path/{imgPath}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> getClothesImageByPath(@PathVariable String imgPath) throws IOException {
-        byte[] imageBytes = clothesService.getClothesImageByPath(imgPath);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-        return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+
+
+    @GetMapping("/filter")
+    public List<Clothes> getFilteredClothes(@RequestParam String subcategory) {
+        return clothesService.getFilteredClothes(subcategory);
     }
 
 
+    @GetMapping("/recommendation")
+    public List<Clothes> getRecommendedClothes(@RequestParam("subcategories") List<String> subcategories) {
+        List<Clothes> recommendedClothes = new ArrayList<>();
+
+        for (String subcategory : subcategories) {
+            String decodedSubcategory = null;
+            try {
+                decodedSubcategory = URLDecoder.decode(subcategory, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            List<Clothes> clothes = clothesService.getRecommendedClothes(decodedSubcategory);
+            recommendedClothes.addAll(clothes);
+        }
+
+        return recommendedClothes;
+    }
 }
