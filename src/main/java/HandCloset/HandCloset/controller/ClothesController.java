@@ -22,6 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.net.URLDecoder;
 import org.springframework.http.HttpHeaders;
+import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityNotFoundException;
+
 @RestController
 @RequestMapping("/api/clothing")
 public class ClothesController {
@@ -52,6 +57,54 @@ public class ClothesController {
         return clothesService.saveClothes(clothes);
     }
 
+    @PutMapping("/{id}")
+    public Clothes updateClothes(@PathVariable Long id,
+                                 @RequestParam(value = "file", required = false) MultipartFile file,
+                                 @RequestParam(value = "category", required = false) String category,
+                                 @RequestParam(value = "subcategory", required = false) String subcategory,
+                                 @RequestParam(value = "season", required = false) String season,
+                                 @RequestParam(value = "description", required = false) String description) {
+        Clothes clothes = clothesService.getClothes(id);
+
+        if (clothes == null) {
+            throw new EntityNotFoundException("Clothes entity with id " + id + " does not exist.");
+        }
+
+        if (file != null) {
+            // 기존 이미지 삭제
+            String imagePath = clothes.getImgpath();
+            String modifiedImagePath = imagePath.replace("\\", "/");
+            Path imageFilePath = Paths.get(modifiedImagePath);
+            try {
+                Files.delete(imageFilePath);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to delete image.");
+            }
+
+            // 새로운 이미지 저장
+            String newImagePath = clothesService.saveImage(file);
+            clothes.setImgpath(newImagePath);
+        }
+
+        if (category != null) {
+            clothes.setCategory(category);
+        }
+
+        if (subcategory != null) {
+            clothes.setSubcategory(subcategory);
+        }
+
+        if (season != null) {
+            clothes.setSeason(season);
+        }
+
+        if (description != null) {
+            clothes.setDescription(description);
+        }
+
+        return clothesService.saveClothes(clothes);
+    }
+
     @GetMapping("/{id}")
     public Clothes getClothes(@PathVariable Long id) {
         return clothesService.getClothes(id);
@@ -62,12 +115,30 @@ public class ClothesController {
         return clothesService.getAllClothes();
     }
 
+    // ClothesDetail-삭제
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Transactional //이미지 삭제와 DB 데이터 삭제를 트랜잭션으로 묶어서 처리.두 작업이 모두 성공해야만 삭제가 완료
     public void deleteClothes(@PathVariable Long id) {
-        clothesService.deleteClothes(id);
-    }
+        try {
+            Clothes clothes = clothesService.getClothes(id);
+            String imagePath = clothes.getImgpath();
+            // 파일 경로 구분자 수정
+            String modifiedImagePath = imagePath.replace("\\", "/");
+            Path imageFilePath = Paths.get(modifiedImagePath);
 
+            // 파일 시스템에서 이미지 삭제
+            Files.delete(imageFilePath);
+
+            // 이미지 삭제가 성공한 경우에만 DB에서 데이터 삭제
+            clothesService.deleteClothes(id);
+        } catch (IOException e) {
+            // 파일 삭제 실패 시 예외 처리
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete image and data.");
+        }
+    }
+    // CategoryItem-카테고리
     @GetMapping("/category")
     public List<Clothes> getClothesByCategoryAndSubcategory(
             @RequestParam(required = false) String category,
@@ -79,7 +150,7 @@ public class ClothesController {
             return clothesService.getClothesByCategoryAndSubcategory(category, subcategory);
         }
     }
-    //CategoryItem
+    // 파일 시스템에서 이미지 가져오기 
     @GetMapping(value = "/images/{id}", produces = MediaType.IMAGE_JPEG_VALUE) //이미지의 경로를 통해 단일 이미지를 가져옴
     public byte[] getClothesImage(@PathVariable Long id) throws IOException {
         Clothes clothes = clothesService.getClothes(id);
@@ -87,22 +158,15 @@ public class ClothesController {
         Path imagePath = Paths.get(imgpath);
         return Files.readAllBytes(imagePath);
     }
-    //CategoryItem
-    @GetMapping("/images/all")
-    public List<byte[]> getAllClothesImagePaths() throws IOException {
-        List<byte[]> allImages = new ArrayList<>();
 
-        // 데이터베이스에서 이미지 파일 경로를 가져옴
-        List<Clothes> clothesList = clothesService.getAllClothes();
-        for (Clothes clothes : clothesList) {
-            String imagePath = clothes.getImgpath();
-            Path imageFilePath = Paths.get(imagePath);
-            byte[] imageBytes = Files.readAllBytes(imageFilePath);
-            allImages.add(imageBytes);
-        }
-
-        return allImages;
+    // CategoryItem-전체
+    @GetMapping("/ids")
+    public List<Long> getAllClothesIds() {
+        return clothesService.getAllClothes().stream()
+                .map(Clothes::getId)
+                .collect(Collectors.toList());
     }
+
     // ItemHave
     @GetMapping("/category-item-count")
     public ResponseEntity<Map<String, Integer>> getCategoryItemCountForClothes() {

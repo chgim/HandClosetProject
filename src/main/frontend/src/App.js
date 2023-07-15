@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 
 import "./App.css";
 import Main from "./pages/Main";
-import Calendar from "./pages/Calendar";
+import Diary from "./pages/Diary";
 import MyPage from "./pages/MyPage";
 import Closet from "./pages/Closet";
 import ClothingForm from "./pages/ClothingForm";
@@ -13,6 +13,8 @@ import ItemSeason from "./pages/ItemSeason";
 import ClothingRecommendation from "./pages/CothingRecommendation";
 import ItemFrequently from "./pages/ItemFrequently";
 import ItemNotRecently from "./pages/ItemNotRecently";
+import ClothingUpdateForm from "./pages/ClothingUpdateForm";
+import DiaryAdd from "./pages/DiaryAdd";
 function App() {
   return (
     <div className="App">
@@ -22,7 +24,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/Main" element={<Main />} />
-        <Route path="/Calendar" element={<Calendar />} />
+        <Route path="/Diary" element={<Diary />} />
         <Route path="/MyPage" element={<MyPage />} />
         <Route path="/Closet" element={<Closet />} />
           <Route path="/ItemHave" element={<ItemHave />} />
@@ -32,7 +34,8 @@ function App() {
         <Route path="/ClothingForm" element={<ClothingForm />} />
         <Route path="/clothes/:id" element={<ClothesDetail />} />
         <Route path="/ClothingRecommendation" element={<ClothingRecommendation />} />
-
+        <Route path="/ClothingUpdateForm/:id" element={<ClothingUpdateForm />} />
+        <Route path="/DiaryAdd" element={<DiaryAdd />} />
       </Routes>
     </div>
   );

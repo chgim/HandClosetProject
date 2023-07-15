@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./BottomNav.css";
+import "./style/BottomNav.css";
 import { Link } from "react-router-dom";
 
 // 사용할 아이콘 import
@@ -30,7 +30,7 @@ const BottomNav = () => {
           />
         </div>
       </Link>
-      <Link to="/Calendar" className="nav-link" onClick={() => setActiveNav(3)}>
+      <Link to="/Diary" className="nav-link" onClick={() => setActiveNav(3)}>
         <div>
           <FontAwesomeIcon
             icon="calendar"
