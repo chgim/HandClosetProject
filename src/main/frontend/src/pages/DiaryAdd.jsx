@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import back from "../images/back.png";
@@ -12,11 +12,43 @@ const DiaryAdd = () => {
   const selectedDateUTC = new Date(searchParams.get("selectedDate"));
 
   // 날짜 출력 시 시간대 변환
-  const formattedDate = selectedDateUTC.toLocaleDateString("ko-KR", {
-    timeZone: "UTC", // 선택한 시간대에 맞게 변경
-  });
-  const handleSubmit = () => {
-    navigate(`/Diary`);
+  const formattedDate = selectedDateUTC.toISOString().split("T")[0]; // 'YYYY-MM-DD' 형식으로 변환
+
+  const [season, setSeason] = useState([]);
+  const handleSeasonChange = (e) => {
+    const selectedSeason = e.target.value;
+    setSeason((prevSeasons) => {
+      if (prevSeasons.includes(selectedSeason)) {
+        return prevSeasons.filter((season) => season !== selectedSeason);
+      } else {
+        return [...prevSeasons, selectedSeason];
+      }
+    });
+  };
+
+  const handleSubmit = async () => {
+    console.log(formattedDate);
+    try {
+      const response = await fetch("/api/diary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: formattedDate,
+          season: season,
+        }),
+      });
+      if (response.ok) {
+        console.log("Diary entry saved successfully.");
+      } else {
+        console.error("Error saving diary entry.");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    } finally {
+      navigate(`/Diary`);
+    }
   };
 
   return (
@@ -30,6 +62,44 @@ const DiaryAdd = () => {
       {/*<h2>Add Diary Entry for: {selectedDate}</h2>*/}
       <h2>Add Diary Entry for: {formattedDate}</h2>
       {/* Diary 추가 폼 또는 컴포넌트를 표시할 수 있습니다. */}
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            value="봄"
+            checked={season.includes("봄")}
+            onChange={handleSeasonChange}
+          />
+          봄
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="여름"
+            checked={season.includes("여름")}
+            onChange={handleSeasonChange}
+          />
+          여름
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="가을"
+            checked={season.includes("가을")}
+            onChange={handleSeasonChange}
+          />
+          가을
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="겨울"
+            checked={season.includes("겨울")}
+            onChange={handleSeasonChange}
+          />
+          겨울
+        </label>
+      </div>
     </Container>
   );
 };
