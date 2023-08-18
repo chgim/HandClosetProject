@@ -282,7 +282,7 @@ const Main = () => {
           style={{
             backgroundColor: "#364054",
             borderRadius: "3px",
-            width: "75%",
+            width: "81%",
             padding: "3px",
             color: "white",
           }}
@@ -330,7 +330,7 @@ const Container = styled.div`
 `;
 
 const ButtonContainer = styled.div`
-  width: 75%;
+  width: 82%;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 20px;
@@ -342,7 +342,7 @@ const Button = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100px;
+  height: 80px;
   background-color: #efefef;
   border-radius: 8px;
   color: black;
@@ -354,7 +354,7 @@ const Button = styled.div`
 const ImageContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-gap: 15px;
+  grid-gap: 20px;
   margin-top: 20px;
 
   img {
@@ -372,6 +372,7 @@ const ImageContainer = styled.div`
 const ImageWrapper = styled.div`
   border-radius: 5px;
   padding-top: 10px;
+
   box-shadow: 2px 2px 2px 2px #efefef;
   margin-bottom: 20px;
 `;

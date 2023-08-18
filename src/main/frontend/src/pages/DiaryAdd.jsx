@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import back from "../images/back.png";
 import styled from "styled-components";
 import update from "../images/update.png";
+import axios from "axios";
+import check from "../images/check.png";
 const DiaryAdd = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -26,28 +28,33 @@ const DiaryAdd = () => {
     });
   };
 
-  const handleSubmit = async () => {
-    console.log(formattedDate);
-    try {
-      const response = await fetch("/api/diary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          date: formattedDate,
-          season: season,
-        }),
-      });
-      if (response.ok) {
-        console.log("Diary entry saved successfully.");
-      } else {
-        console.error("Error saving diary entry.");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (season.length === 0) {
+      alert("적어도 하나의 계절을 선택해주세요.");
+    } else {
+      let season_str = season ? season.join() : "";
+      const formData = new FormData();
+      formData.append("season", season_str);
+      formData.append("date", formattedDate);
+
+      for (let key of formData.keys()) {
+        console.log(key, ":", formData.get(key));
       }
-    } catch (error) {
-      console.error("An error occurred:", error);
-    } finally {
-      navigate(`/Diary`);
+      console.log(formattedDate);
+      try {
+        const response = await axios.post("/api/diary", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        const data = response.data;
+        console.log(data);
+      } catch (error) {
+        console.error("An error occurred:", error);
+      } finally {
+        navigate(`/Diary`);
+      }
     }
   };
 
@@ -55,9 +62,11 @@ const DiaryAdd = () => {
     <Container>
       <Header>
         <BackButton onClick={() => navigate("/Closet")}>
-          <img src={back} alt="back" style={{ width: "34px" }} />
+          <img src={back} alt="back" style={{ width: "38px" }} />
         </BackButton>
-        <SubmitButton onClick={handleSubmit}>제출</SubmitButton>
+        <SubmitButton onClick={handleSubmit}>
+          <img src={check} alt="check" style={{ width: "28px" }} />
+        </SubmitButton>
       </Header>
       {/*<h2>Add Diary Entry for: {selectedDate}</h2>*/}
       <h2>Add Diary Entry for: {formattedDate}</h2>
@@ -124,9 +133,7 @@ const BackButton = styled.div`
   margin-left: 9%;
 `;
 const SubmitButton = styled.div`
-  margin-top: 23px;
+  margin-top: 25px;
   margin-right: 9%;
-  font-size: 20px;
-  font-weight: bold;
 `;
 export default DiaryAdd;

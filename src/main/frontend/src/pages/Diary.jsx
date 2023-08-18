@@ -53,7 +53,7 @@ const Header = styled.div`
 const PlusButton = styled.div`
   margin-top: 23px;
   margin-right: 9%;
-  font-size: 40px;
+  font-size: 45px;
 `;
 
 const Diary = () => {
