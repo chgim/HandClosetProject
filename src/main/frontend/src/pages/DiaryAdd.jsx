@@ -18,6 +18,8 @@ const DiaryAdd = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedImageIds, setSelectedImageIds] = useState([]); // Add this line
+
   const handleSeasonChange = (e) => {
     const selectedSeason = e.target.value;
     setSeason((prevSeasons) => {
@@ -37,13 +39,14 @@ const DiaryAdd = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (season.length === 0) {
-      alert("적어도 하나의 계절을 선택해주세요.");
+    if (season.length === 0 || selectedImageIds.length === 0) { // Use selectedImageIds here
+      alert("적어도 하나의 계절과 이미지를 선택해주세요.");
     } else {
       let season_str = season ? season.join() : "";
       const formData = new FormData();
       formData.append("season", season_str);
       formData.append("date", formattedDate);
+      formData.append("imageIds", selectedImageIds.join()); // Add selected image IDs
 
       for (let key of formData.keys()) {
         console.log(key, ":", formData.get(key));
