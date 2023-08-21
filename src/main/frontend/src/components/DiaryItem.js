@@ -3,10 +3,10 @@ import { getAllClothesIds } from "../utils/api"; // API 호출 함수 추가
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 
-function DiaryItem({ category, subcategory, items }) {
+function DiaryItem({ category, subcategory, items, selectedImageIds,  setSelectedImageIds }) {
   const [ids, setIds] = useState([]); // ID 목록 상태 추가
   const navigate = useNavigate();
-  const [selectedImageIds, setSelectedImageIds] = useState([]);
+  // const [selectedImageIds, setSelectedImageIds] = useState([]);
 
   useEffect(() => {
     const fetchIds = async () => {
