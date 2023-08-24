@@ -8,7 +8,7 @@ import check from "../images/check.png";
 import CategoryMenu from "../components/CategoryMenu";
 import DiaryItem from "../components/DiaryItem";
 import styles from "../style/ClothingForm.module.css";
-
+import DefaultImage from "../images/default/DefaultImage.png";
 const DiaryAdd = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,6 +48,10 @@ const DiaryAdd = () => {
 
   const handleImageCancel = () => {
     setThumbnailpath(null);
+    const fileInput = document.getElementById(styles.file); // ID를 통해 입력 요소 가져오기
+    if (fileInput) {
+      fileInput.value = ''; // 입력 요소의 값을 초기화하여 선택한 파일 제거
+    }
   };
 
 
@@ -77,11 +81,19 @@ const DiaryAdd = () => {
     } else {
       let season_str = season ? season.join() : "";
       const formData = new FormData();
-      formData.append('file', e.target.file.files[0]);
+
+      // 파일을 업로드할 때 선택한 파일이 없는 경우
+      if (!e.target.file.files[0]) {
+        // 디폴트 이미지 파일을 formData에 추가
+        const defaultImageFile = new File([DefaultImage], 'default.png', { type: 'image/png' });
+        formData.append('file', defaultImageFile);
+      } else {
+        formData.append('file', e.target.file.files[0]);
+      }
       formData.append("season", season_str);
       formData.append("date", formattedDate);
       formData.append("imageIds", selectedImageIds.join()); // Add selected image IDs
-      formData.append('note', note || '노트에 기록하세요');
+      formData.append('note', note || '');
       //console.log(selectedImageIds.join());
 
       for (let key of formData.keys()) {
