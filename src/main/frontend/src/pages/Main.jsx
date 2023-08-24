@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import axios from "axios";
 //images
 import blanket from "../images/category/blanket.png";
@@ -141,7 +141,7 @@ const Main = () => {
   };
 
   const getWeatherIconUrl = (iconCode) => {
-    return `http://openweathermap.org/img/w/${iconCode}.png`;
+    return `http://openweathermap.org/img/wn/${iconCode}@4x.png`;
   };
 
   const getRecommendedCategory = (temperature) => {
@@ -245,82 +245,106 @@ const Main = () => {
   };
 
   return (
-    <div>
-      <Container>
-        {latitude && longitude && cityCode && <p>현재 도시: {cityCode}</p>}
+      <div>
+        <GlobalStyle />
         {weatherData && (
-          <div>
-            <p>{koreanCityCode}의 날씨</p>
-            <p>날씨: {weatherData.weather[0].description}</p>
-            <p>기온: {Math.round(weatherData.main.temp)}°C</p>
-            <p>습도: {weatherData.main.humidity}%</p>
-            <p>구름: {weatherData.clouds.all}%</p>
-            <p>풍속: {weatherData.wind.speed} m/s</p>
-            <img
-              src={getWeatherIconUrl(weatherData.weather[0].icon)}
-              alt="Weather Icon"
-            />
+            <>
+              <WeatherWidgetBox>
+                <Widget>
+                  <Left>
+                    <Icon
+                        src={getWeatherIconUrl(weatherData.weather[0].icon)}
+                        alt="Weather Icon"
+                    ></Icon>
+                    <WeatherStatus>{weatherData.weather[0].description}</WeatherStatus>
+                  </Left>
+                  <Right>
+                    <City>{koreanCityCode}</City>
+                    <Degree>{Math.round(weatherData.main.temp)}°C</Degree>
+                  </Right>
+                  <Bottom>
+                    <Desdiv>
+                      풍속  <span>{weatherData.wind.speed} m/s</span>
+                    </Desdiv>
+                    <Desdiv>
+                      구름 <span>{weatherData.clouds.all}%</span>
+                    </Desdiv>
+                    <Desdiv>
+                      습도 <span>{weatherData.main.humidity}%</span>
+                    </Desdiv>
+                  </Bottom>
+                </Widget>
+              </WeatherWidgetBox>
+            </>)}
 
-            {recommendedCategoryImages.length > 0 && (
+        <Container>
+          {recommendedCategoryImages.length > 0 && (
               <ImageContainer>
                 {recommendedCategoryImages.map((categoryData, index) => (
-                  <div key={index}>
-                    <ImageWrapper>
-                      <img
-                        src={categoryData.image}
-                        alt="Recommended Clothing"
-                      />
-                      <p>{categoryData.subcategory}</p>
-                    </ImageWrapper>
-                  </div>
+                    <div key={index}>
+                      <ImageWrapper>
+                        <img
+                            src={categoryData.image}
+                            alt="Recommended Clothing"
+                        />
+                        <p>{categoryData.subcategory}</p>
+                      </ImageWrapper>
+                    </div>
                 ))}
               </ImageContainer>
-            )}
-          </div>
-        )}
-        <div
-          style={{
-            backgroundColor: "#364054",
-            borderRadius: "3px",
-            width: "81%",
-            padding: "3px",
-            color: "white",
-          }}
-          onClick={() => {
-            navigate("/ClothingRecommendation", {
-              state: { subcategories: recommendedSubcategory },
-            });
-          }}
-        >
-          <h4>오늘 입을 스타일을 추천 해줄게요!</h4>
-        </div>
+          )}
 
-        <ButtonContainer>
-          <Button onClick={() => navigate("/ItemHave")}>
-            옷장 속 가장 많은
-            <br />
-            아이템
-          </Button>
-          <Button onClick={() => navigate("/ItemSeason")}>
-            계절 별 아이템
-            <br />
-            개수
-          </Button>
-          <Button onClick={() => navigate("/ItemFrequently")}>
-            가장 자주 입은
-            <br />
-            아이템
-          </Button>
-          <Button onClick={() => navigate("/ItemNotRecently")}>
-            요즘 입지 않은
-            <br />
-            아이템
-          </Button>
-        </ButtonContainer>
-      </Container>
-    </div>
+          <div
+              style={{
+                backgroundColor: "#364054",
+                borderRadius: "3px",
+                width: "81%",
+                padding: "3px",
+                color: "white",
+              }}
+              onClick={() => {
+                navigate("/ClothingRecommendation", {
+                  state: { subcategories: recommendedSubcategory },
+                });
+              }}
+          >
+            <h4>오늘 입을 스타일을 추천 해줄게요!</h4>
+          </div>
+
+          <ButtonContainer>
+            <Button onClick={() => navigate("/ItemHave")}>
+              옷장 속 가장 많은
+              <br />
+              아이템
+            </Button>
+            <Button onClick={() => navigate("/ItemSeason")}>
+              계절 별 아이템
+              <br />
+              개수
+            </Button>
+            <Button onClick={() => navigate("/ItemFrequently")}>
+              가장 자주 입은
+              <br />
+              아이템
+            </Button>
+            <Button onClick={() => navigate("/ItemNotRecently")}>
+              요즘 입지 않은
+              <br />
+              아이템
+            </Button>
+          </ButtonContainer>
+        </Container>
+      </div>
   );
 };
+
+const GlobalStyle = createGlobalStyle`
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;600&display=swap');
+  
+  body {
+    font-family: 'Poppins', sans-serif;
+  }
+`;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -375,5 +399,74 @@ const ImageWrapper = styled.div`
 
   box-shadow: 2px 2px 2px 2px #efefef;
   margin-bottom: 20px;
+`;
+
+const WeatherWidgetBox = styled.div`
+  position: relative;
+`;
+
+const Widget = styled.div`
+  width: 100%;
+  height: 200px;
+`;
+
+const Left = styled.div`
+  position: absolute;
+  left: 0;
+  width: 200px;
+`;
+const Right=styled.div`
+  position: absolute;
+  right: 0;
+  width: 200px;
+  color: rgb(54,64,84);
+  margin: 50px 0;
+`;
+const Icon = styled.img`
+  width: 75%;
+  margin-bottom: -30px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+`;
+
+const WeatherStatus = styled.h5`
+  color: rgb(54,64,84);
+  text-align: center;
+  margin-top: 0;
+`;
+
+const City = styled.h5`
+  font-size: 1em;
+  text-align: center;
+  margin: 0;
+
+`;
+
+const Degree=styled.h5`
+  font-size: 3em;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+
+`;
+
+const Bottom=styled.div`
+  width: 100%;
+  position: absolute;
+  bottom: 10px;
+  display: inline-flex;
+  justify-content: center;
+  color: rgb(54,64,84);
+  left: 1px;
+`;
+
+const Desdiv = styled.div`
+  margin: 5px 10px 5px 10px;
+  text-align: center;
+  line-height: 100%;
+  font-size: 0.83em;
+  font-weight: bold;
+
 `;
 export default Main;
