@@ -1,5 +1,6 @@
 
 package HandCloset.HandCloset.service;
+import HandCloset.HandCloset.entity.Diary;
 import org.springframework.beans.factory.annotation.Value;
 import HandCloset.HandCloset.entity.Clothes;
 import HandCloset.HandCloset.repository.ClothesRepository;
@@ -119,7 +120,7 @@ public class ClothesService {
     }
 
     public List<Clothes> getRecommendedClothesAsc(String subcategory) {
-        return clothesRepository.findTop2BySubcategoryOrderByWearcnt(subcategory);
+        return clothesRepository.findTop2BySubcategoryOrderByWearcntAsc(subcategory);
     }
 
     public void updateWearCountAndCreateDate(Long imageId,Date date) {
@@ -132,5 +133,8 @@ public class ClothesService {
             }
             clothesRepository.save(clothes);
         });
+    }
+    public List<Clothes> getClothesByImageIds(List<Long> imageIds) {
+        return clothesRepository.findByIdIn(imageIds);
     }
 }

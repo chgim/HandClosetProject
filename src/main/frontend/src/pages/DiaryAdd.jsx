@@ -9,6 +9,7 @@ import CategoryMenu from "../components/CategoryMenu";
 import DiaryItem from "../components/DiaryItem";
 import styles from "../style/ClothingForm.module.css";
 import DefaultImage from "../images/default/DefaultImage.png";
+
 const DiaryAdd = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -76,7 +77,7 @@ const DiaryAdd = () => {
     e.preventDefault();
     console.log( "봐봐", e.target.file.files[0]);
     if (season.length === 0 || selectedImageIds.length === 0) { // Use selectedImageIds here
-      alert("적어도 하나의 계절과 이미지를 선택해주세요.");
+      alert("적어도 하나의 계절과 아이템을 선택해주세요.");
 
     } else {
       let season_str = season ? season.join() : "";
@@ -84,9 +85,18 @@ const DiaryAdd = () => {
 
       // 파일을 업로드할 때 선택한 파일이 없는 경우
       if (!e.target.file.files[0]) {
-        // 디폴트 이미지 파일을 formData에 추가
-        const defaultImageFile = new File([DefaultImage], 'default.png', { type: 'image/png' });
-        formData.append('file', defaultImageFile);
+
+        // const defaultImageFile = new File([DefaultImage], 'default.png', { type: 'image/png' });
+        // formData.append('file', defaultImageFile);
+        const response = await fetch(DefaultImage);
+        const defaultImageBlob = await response.blob();
+
+// Blob 객체를 File 객체로 변환
+        const defaultImageFile = new File([defaultImageBlob], "default.png", { type: "image/png" });
+
+// FormData에 추가
+        formData.append("file", defaultImageFile);
+
       } else {
         formData.append('file', e.target.file.files[0]);
       }
