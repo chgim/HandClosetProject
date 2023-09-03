@@ -25,10 +25,11 @@ public class DiaryService {
     private String diaryUploadDirectory;
 
     private final DiaryRepository diaryRepository;
+    private final ClothesService clothesService;
 
-
-    public DiaryService(DiaryRepository diaryRepository) {
+    public DiaryService(DiaryRepository diaryRepository, ClothesService clothesService) {
         this.diaryRepository = diaryRepository;
+        this.clothesService=clothesService;
 
 
     }
@@ -72,24 +73,17 @@ public class DiaryService {
     public List<Diary> findDiariesByImageId(Long imageId) {
         return diaryRepository.findAllByImageIdsContaining(imageId);
     }
-    /*
+
     public void deleteDiary(Long id) {
         Diary diary = diaryRepository.findById(id).orElse(null);
         if (diary != null) {
             List<Long> imageIds = diary.getImageIds();
 
-            // 이미지 ID가 비어있지 않으면 이미지 ID에 해당하는 Clothes 아이템들의 createdate를 최신으로 업데이트하고 wearcnt를 -1
             if (!imageIds.isEmpty()) {
                 for (Long imageId : imageIds) {
-                    Optional<Clothes> optionalClothes = clothesRepository.findById(imageId);
-                    optionalClothes.ifPresent(clothes -> {
-                        Date latestDate = findLatestDateByImageId(imageId);
-                        if (latestDate != null) {
-                            clothes.setCreatedate(latestDate);
-                        }
-                        clothes.setWearcnt(clothes.getWearcnt() - 1);
-                        clothesRepository.save(clothes);
-                    });
+                    // Delegate the work to clothesService
+                    Date secondLatestDate = findSecondLatestDateByImageId(imageId);
+                    clothesService.updateWearCountAndCreateDateOnDelete(imageId, secondLatestDate);
                 }
             }
 
@@ -97,24 +91,29 @@ public class DiaryService {
         }
     }
 
-     */
-    /*
-    public Date findLatestDateByImageId(Long imageId) {
+
+
+
+    public Date findSecondLatestDateByImageId(Long imageId) {
         List<Diary> diaries = diaryRepository.findAllByImageIdsContaining(imageId);
         Date latestDate = null;
+        Date secondLatestDate = null;
 
         for (Diary diary : diaries) {
             List<Long> imageIds = diary.getImageIds();
             if (imageIds.contains(imageId)) {
                 Date diaryDate = diary.getDate();
                 if (latestDate == null || diaryDate.after(latestDate)) {
+                    secondLatestDate = latestDate;
                     latestDate = diaryDate;
+                } else if (secondLatestDate == null || diaryDate.after(secondLatestDate)) {
+                    secondLatestDate = diaryDate;
                 }
             }
         }
 
-        return latestDate;
+        return secondLatestDate;
     }
-    */
+
 
 }

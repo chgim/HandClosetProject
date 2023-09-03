@@ -136,7 +136,7 @@ public class ClothesController {
             Files.delete(imageFilePath);
 
             // 다이어리 엔트리에서 해당 의류 아이템의 ID를 참조하는 경우 삭제 처리
-            /*
+
             List<Diary> referencingDiaries = diaryService.findDiariesByImageId(id);
             for (Diary diary : referencingDiaries) {
                 diary.getImageIds().remove(id);
@@ -147,7 +147,7 @@ public class ClothesController {
                 }
             }
 
-             */
+
 
             // 이미지 삭제가 성공한 경우에만 DB에서 데이터 삭제
             clothesService.deleteClothes(id);

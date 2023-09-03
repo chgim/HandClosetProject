@@ -65,13 +65,13 @@ public class DiaryController {
 
         // Update wearcnt and createdate for each selected image
         for (Long imageId : imageIdList) {
-            clothesService.updateWearCountAndCreateDate(imageId,date);
+            clothesService.updateWearCountAndCreateDateOnCreate(imageId,date);
         }
 
         return savedDiary;
     }
 
-    /*
+
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -97,7 +97,7 @@ public class DiaryController {
         }
     }
 
-     */
+
     @GetMapping("/entries")
     public ResponseEntity<List<Diary>> getAllDiaryEntries() {
         List<Diary> diaryEntries = diaryService.getAllDiaryEntries();

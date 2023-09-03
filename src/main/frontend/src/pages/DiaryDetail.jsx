@@ -61,7 +61,7 @@ function DiaryDetail() {
             console.log("fetchClothesData 함수 실행 ");
         }
     };
-    /*
+
     const handleDelete = async () => {
         try {
             await axios.delete(`/api/diary/${id}`);
@@ -71,7 +71,7 @@ function DiaryDetail() {
         }
     };
 
-     */
+
 
     if (loading) {
         return <div>Loading...</div>;
@@ -87,7 +87,7 @@ function DiaryDetail() {
                 <BackButton onClick={() => navigate("/Diary")}>
                     <img src={back} alt="back" style={{ width: "28px" }} />
                 </BackButton>
-                <TrashWrapper >
+                <TrashWrapper onClick={handleDelete}>
                     <img src={trash} alt="trash" />
                 </TrashWrapper>
             </Header>

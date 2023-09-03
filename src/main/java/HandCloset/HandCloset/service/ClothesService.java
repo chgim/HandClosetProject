@@ -123,7 +123,7 @@ public class ClothesService {
         return clothesRepository.findTop2BySubcategoryOrderByWearcntAsc(subcategory);
     }
 
-    public void updateWearCountAndCreateDate(Long imageId,Date date) {
+    public void updateWearCountAndCreateDateOnCreate(Long imageId,Date date) {
         Optional<Clothes> optionalClothes = clothesRepository.findById(imageId);
         optionalClothes.ifPresent(clothes -> {
             clothes.setWearcnt(clothes.getWearcnt() + 1);
@@ -134,6 +134,19 @@ public class ClothesService {
             clothesRepository.save(clothes);
         });
     }
+
+    public void updateWearCountAndCreateDateOnDelete(Long imageId,Date date) {
+        Optional<Clothes> optionalClothes = clothesRepository.findById(imageId);
+        optionalClothes.ifPresent(clothes -> {
+            clothes.setWearcnt(clothes.getWearcnt() - 1);
+            Date existingCreatedate = clothes.getCreatedate();
+            clothes.setCreatedate(date); // 최근의 날짜인 경우에만 createdate를 업데이트 시킴
+
+            clothesRepository.save(clothes);
+        });
+    }
+
+
     public List<Clothes> getClothesByImageIds(List<Long> imageIds) {
         return clothesRepository.findByIdIn(imageIds);
     }
