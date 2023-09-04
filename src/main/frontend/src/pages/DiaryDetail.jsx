@@ -65,6 +65,7 @@ function DiaryDetail() {
     const handleDelete = async () => {
         try {
             await axios.delete(`/api/diary/${id}`);
+            navigate("/Diary");
             // Optionally, navigate the user to a different page or refresh the entries.
         } catch (error) {
             console.error("Failed to delete diary entry:", error);
@@ -94,17 +95,20 @@ function DiaryDetail() {
             <ThumbnailImage src={`/api/diary/images?thumbnailpath=${encodeURIComponent(diary.thumbnailpath)}`} alt="Thumbnail" />
 
             {clothesData.map((clothes) => (
+                <div>
+
                 <ClothesItem key={clothes.id}>
                     <ItemImage src={`/api/clothing/images/${clothes.id}`} alt={clothes.description} />
                     <Details>
-                        <div>카테고리: {clothes.category}</div>
-                        <div>계절: {clothes.season}</div>
-                        <div>착용횟수: {clothes.wearcnt}회</div>
-                        <div>등록일: {formatDate(clothes.createdate)}</div>
+                        <Elements>카테고리: {clothes.category}</Elements>
+                        <Elements>계절: {clothes.season}</Elements>
+                        <Elements>착용횟수: {clothes.wearcnt}회</Elements>
+                        <Elements>등록일: {formatDate(clothes.createdate)}</Elements>
                     </Details>
 
                 </ClothesItem>
 
+                </div>
             ))}
         </Container>
     );
@@ -157,8 +161,11 @@ const ItemImage = styled.img`
 const Details = styled.div`
   display: flex;
   flex-direction: column;
+  
 `;
-
+const Elements= styled.div`
+  float:left;
+`;
 
 
 export default DiaryDetail;
