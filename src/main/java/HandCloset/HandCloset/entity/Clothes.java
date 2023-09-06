@@ -33,9 +33,10 @@ public class Clothes {
 
     private String description;
 
-
-
     private int wearcnt;
+
+    @Column(nullable = false)
+    private String color;
 
 
 
@@ -112,5 +113,13 @@ public class Clothes {
 
     public void setCreatedate(Date createdate) {
         this.createdate = createdate;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getColor() {
+        return color;
     }
 }

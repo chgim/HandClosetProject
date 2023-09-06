@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios"; // Axios를 이용하여 서버 요청 처리
 import styled from "styled-components";
-import {deleteClothes, getClothes, getClothesByImageIds} from "../utils/api"; // utils/api에서 getClothes 함수를 불러옴
+import { getClothesByImageIds} from "../utils/api"; // utils/api에서 getClothes 함수를 불러옴
 import back from "../images/back.png";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "../utils/dateFormat";

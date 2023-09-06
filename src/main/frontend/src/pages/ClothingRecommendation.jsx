@@ -113,7 +113,7 @@ const ClothingRecommendation = () => {
     return (
         <div>
             <GloStyle/>
-            <BackButton onClick={() => navigate("/Closet")}>
+            <BackButton onClick={() => navigate("/Main")}>
                 <img src={back} alt="back" style={{width: "28px"}}/>
             </BackButton>
             <ButtonContainer>

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 function DiaryItem({ category, subcategory, items, selectedImageIds,  setSelectedImageIds }) {
   const [ids, setIds] = useState([]); // ID 목록 상태 추가
   const navigate = useNavigate();
-  // const [selectedImageIds, setSelectedImageIds] = useState([]);
+
 
   useEffect(() => {
     const fetchIds = async () => {
@@ -31,20 +31,6 @@ function DiaryItem({ category, subcategory, items, selectedImageIds,  setSelecte
     });
   };
 
-  // const handleClickImage = (item, index) => {
-  //     let itemId;
-  //
-  //     if (category === "전체") {
-  //         // "전체" 카테고리에서는 ids 배열을 사용하여 이미지의 ID를 가져옴
-  //         itemId = ids[index];
-  //     } else {
-  //         // 다른 카테고리에서는 item 객체에 ID가 있음
-  //         itemId = item.id;
-  //     }
-  //
-  //     console.log(itemId);
-  //     navigate(`/clothes/${itemId}`);
-  // };
   return (
     <div>
       <ImageGrid>
