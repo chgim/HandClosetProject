@@ -1,14 +1,10 @@
-
-
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import styled from "styled-components";
 import DiaryThumbnail from "../components/DiaryThumbnail";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-
 
 const Diary = () => {
   const [value, onChange] = useState(new Date());
@@ -26,35 +22,38 @@ const Diary = () => {
   const tileContent = ({ date, view }) => {
     // Check if there's a diary entry for the current date
     const hasDiaryEntry = diaryEntries.some(
-        (entry) =>
-            new Date(entry.date).getDate() === date.getDate() &&
-            new Date(entry.date).getMonth() === date.getMonth() &&
-            new Date(entry.date).getFullYear() === date.getFullYear()
+      (entry) =>
+        new Date(entry.date).getDate() === date.getDate() &&
+        new Date(entry.date).getMonth() === date.getMonth() &&
+        new Date(entry.date).getFullYear() === date.getFullYear()
     );
 
     if (hasDiaryEntry) {
-      return <div style={{
-        backgroundColor: "#364054",
-        borderRadius: "50%",
-        width: "6px",
-        height: "6px",
-        top: "5px", // 위치 조정
-        position: "relative", // 위치 조정을 위한 position 설정
-        margin: "auto", // 수평 가운데 정렬
-
-
-      }}></div>;
+      return (
+        <div
+          style={{
+            backgroundColor: "#364054",
+            borderRadius: "50%",
+            width: "6px",
+            height: "6px",
+            top: "5px", // 위치 조정
+            position: "relative", // 위치 조정을 위한 position 설정
+            margin: "auto", // 수평 가운데 정렬
+          }}
+        ></div>
+      );
     }
-    return <div style={{
-
-      width: "6px",
-      height: "6px",
-      top: "5px", // 위치 조정
-      position: "relative", // 위치 조정을 위한 position 설정
-      margin: "auto", // 수평 가운데 정렬
-
-
-    }}></div>;
+    return (
+      <div
+        style={{
+          width: "6px",
+          height: "6px",
+          top: "5px", // 위치 조정
+          position: "relative", // 위치 조정을 위한 position 설정
+          margin: "auto", // 수평 가운데 정렬
+        }}
+      ></div>
+    );
   };
 
   const handleAddDiary = () => {
@@ -79,9 +78,14 @@ const Diary = () => {
       <Header>
         <PlusButton onClick={handleAddDiary}>+</PlusButton>
       </Header>
-      <CustomCalendar onChange={onChange} value={value} tileContent={tileContent}  onClickDay={handleDateClick} />
-      {selectedDate && <DiaryThumbnail selectedDate={selectedDate} />} {/* Render DiaryEntryDetails if a date is selected */}
-
+      <CustomCalendar
+        onChange={onChange}
+        value={value}
+        tileContent={tileContent}
+        onClickDay={handleDateClick}
+      />
+      {selectedDate && <DiaryThumbnail selectedDate={selectedDate} />}{" "}
+      {/* Render DiaryEntryDetails if a date is selected */}
     </div>
   );
 };
