@@ -1,5 +1,5 @@
 import {Route, Routes} from "react-router-dom";
-
+import React, { useEffect } from 'react';
 import "./App.css";
 import Main from "./pages/Main";
 import Diary from "./pages/Diary";
@@ -16,8 +16,14 @@ import ItemNotRecently from "./pages/ItemNotRecently";
 import ClothingUpdateForm from "./pages/ClothingUpdateForm";
 import DiaryAdd from "./pages/DiaryAdd";
 import DiaryDetail from "./pages/DiaryDetail";
+import LoginForm from "./pages/LoginForm";
+import JoinForm from "./pages/JoinForm";
+import { useDispatch } from 'react-redux';
 
 function App() {
+
+
+
   return (
       <div className="App">
 
@@ -39,9 +45,12 @@ function App() {
           <Route path="/ClothingUpdateForm/:id" element={<ClothingUpdateForm/>}/>
           <Route path="/DiaryAdd" element={<DiaryAdd/>}/>
           <Route path="/DiaryDetail/:id" element={<DiaryDetail/>}/>
+          <Route path="/LoginForm"  element={<LoginForm/>}/>
+          <Route path="/JoinForm"  element={<JoinForm/>}/>
         </Routes>
       </div>
   );
 }
 
 export default App;
+
