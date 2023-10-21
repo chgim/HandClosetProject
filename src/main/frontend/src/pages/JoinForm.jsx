@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import back from "../images/back.png";
 import styled from "styled-components";
+import axios from "axios";
 const JoinForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -12,20 +13,39 @@ const JoinForm = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        try {
-            const response = await fetch("http://localhost:8090/members/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password, name }), // 추가
-            });
 
-            if (response.ok) {
+        const memberSignupDto = {
+            email,
+            password,
+            name
+
+        };
+        try {
+            const response = await axios.post(
+                "http://localhost:8090/members/signup",
+                memberSignupDto
+            );
+            if (response.status === 200 || response.status == 201) {
                 navigate("/LoginForm");
             }
         } catch (error) {
             console.error(error);
         }
     };
+    //     try {
+    //         const response = await fetch("http://localhost:8090/members/signup", {
+    //             method: "POST",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({ email, password, name }), // 추가
+    //         });
+    //
+    //         if (response.ok) {
+    //             navigate("/LoginForm");
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
 
     return (
         <Container>

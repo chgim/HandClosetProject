@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import back from "../images/back.png";
-
+import axios from "axios";
 
 
 const Container = styled.div`
@@ -63,28 +63,54 @@ const Button = styled.button`
 function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState(null);
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        try {
-            const response = await fetch("http://localhost:8090/members/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await response.json();
 
-            if (response.ok) {
-                console.log(data);
-                localStorage.setItem("loginData", JSON.stringify(data));
-                // localStorage.setItem("isLoggedIn", "true"); // 로그인 상태를 저장
+        try {
+            const response = await axios.post("http://localhost:8090/members/login", {
+                email,
+                password,
+            });
+
+            if (response.status === 200) {
+                const loginInfo = response.data;
+                localStorage.setItem("loginInfo", JSON.stringify(loginInfo));
                 navigate("/"); // 메인 페이지로 이동
+
+                // 로그인 상태 변경 이벤트 발생
+                const event = new Event("loginStatusChanged");
+                window.dispatchEvent(event);
             }
         } catch (error) {
             console.error(error);
+            setErrorMessage("이메일이나 암호가 틀렸습니다.");
         }
     };
+
+
+    //
+    //     try {
+    //         const response = await fetch("http://localhost:8090/members/login", {
+    //             method: "POST",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({ email, password }),
+    //         });
+    //         const data = await response.json();
+    //
+    //         if (response.ok) {
+    //             console.log(data);
+    //             const loginInfo = response.data;
+    //             localStorage.setItem("loginInfo", JSON.stringify(loginInfo));
+    //             // localStorage.setItem("isLoggedIn", "true"); // 로그인 상태를 저장
+    //             navigate("/"); // 메인 페이지로 이동
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
 
     return (
         <Container>
