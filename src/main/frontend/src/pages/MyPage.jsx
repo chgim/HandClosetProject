@@ -102,6 +102,8 @@ const MyPage = () => {
             >
                 로그아웃 하러가기
             </Button>
+
+                {/* <Button onClick={() => navigate("/MyPage2")}>MyPage2로</Button>*/}
             <Dialog
                 open={logoutDialogOpen}
                 onClose={handleLogoutDialogClose}

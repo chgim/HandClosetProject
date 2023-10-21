@@ -56,7 +56,7 @@ const JoinForm = () => {
 
             </Header>
         <Form onSubmit={handleSubmit}>
-            <div style={{color:"#364054", marginBottom:"20px",fontWeight:"bold", fontSize:"43px"}}>회원가입</div>
+            <div style={{color:"#364054", marginBottom:"20px",fontWeight:"bold", fontSize:"40px"}}>회원가입</div>
 
 
                 <Input

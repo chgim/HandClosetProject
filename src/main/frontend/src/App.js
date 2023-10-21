@@ -18,7 +18,7 @@ import DiaryAdd from "./pages/DiaryAdd";
 import DiaryDetail from "./pages/DiaryDetail";
 import LoginForm from "./pages/LoginForm";
 import JoinForm from "./pages/JoinForm";
-
+import MyPage2 from "./pages/MyPage2";
 import { useDispatch } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import myAxios from "./utils/myaxios"; // 추가된 코드
@@ -88,7 +88,7 @@ function App() {
             <Route path="/DiaryDetail/:id" element={<DiaryDetail/>}/>
             <Route path="/LoginForm" element={<LoginForm/>}/>
             <Route path="/JoinForm" element={<JoinForm/>}/>
-
+            <Route path="/MyPage2" element={<MyPage2/>}/>
           </Routes>
         </div>
     );

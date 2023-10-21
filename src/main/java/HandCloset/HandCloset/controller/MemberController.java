@@ -4,7 +4,9 @@ import HandCloset.HandCloset.entity.Member;
 import HandCloset.HandCloset.entity.RefreshToken;
 import HandCloset.HandCloset.entity.Role;
 import HandCloset.HandCloset.dto.*;
+import HandCloset.HandCloset.security.jwt.util.IfLogin;
 import HandCloset.HandCloset.security.jwt.util.JwtTokenizer;
+import HandCloset.HandCloset.security.jwt.util.LoginUserDto;
 import HandCloset.HandCloset.service.MemberService;
 import HandCloset.HandCloset.service.RefreshTokenService;
 import io.jsonwebtoken.Claims;
@@ -128,5 +130,9 @@ public class MemberController {
         return new ResponseEntity(loginResponse, HttpStatus.OK);
     }
 
-
+    @GetMapping("/info")
+    public ResponseEntity userinfo(@IfLogin LoginUserDto loginUserDto) {
+        Member member = memberService.findByEmail(loginUserDto.getEmail());
+        return new ResponseEntity(member, HttpStatus.OK);
+    }
 }

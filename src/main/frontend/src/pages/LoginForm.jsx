@@ -121,7 +121,7 @@ function LoginForm() {
 
                 </Header>
         <Form onSubmit={handleSubmit}>
-          <div style={{color:"#364054", marginBottom:"20px",fontWeight:"bold", fontSize:"43px"}}>로그인</div>
+          <div style={{color:"#364054", marginBottom:"20px",fontWeight:"bold", fontSize:"40px"}}>로그인</div>
 
           <Input
             type="email"
