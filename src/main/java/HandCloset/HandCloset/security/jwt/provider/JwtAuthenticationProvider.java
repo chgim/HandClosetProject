@@ -2,6 +2,7 @@ package HandCloset.HandCloset.security.jwt.provider;
 
 import HandCloset.HandCloset.security.jwt.token.JwtAuthenticationToken;
 import HandCloset.HandCloset.security.jwt.util.JwtTokenizer;
+import HandCloset.HandCloset.security.jwt.util.LoginInfoDto;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -26,9 +27,16 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         Claims claims = jwtTokenizer.parseAccessToken(authenticationToken.getToken());
         // sub에 암호화된 데이터를 집어넣고, 복호화하는 코드를 넣어줄 수 있다.
         String email = claims.getSubject();
+        Long memberId = claims.get("memberId", Long.class);
+        String name = claims.get("name", String.class);
         List<GrantedAuthority> authorities = getGrantedAuthorities(claims);
 
-        return new JwtAuthenticationToken(authorities, email, null);
+        LoginInfoDto loginInfo = new LoginInfoDto();
+        loginInfo.setMemberId(memberId);
+        loginInfo.setEmail(email);
+        loginInfo.setName(name);
+
+        return new JwtAuthenticationToken(authorities, loginInfo, null);
     }
 
     private List<GrantedAuthority> getGrantedAuthorities(Claims claims) {

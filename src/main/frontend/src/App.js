@@ -1,5 +1,5 @@
-import {Route, Routes} from "react-router-dom";
-import React, { useEffect } from 'react';
+import { Route, Routes } from "react-router-dom";
+import React, { useEffect,useState } from "react";
 import "./App.css";
 import Main from "./pages/Main";
 import Diary from "./pages/Diary";
@@ -19,30 +19,33 @@ import DiaryDetail from "./pages/DiaryDetail";
 import LoginForm from "./pages/LoginForm";
 import JoinForm from "./pages/JoinForm";
 import MyPage2 from "./pages/MyPage2";
-import { useDispatch } from 'react-redux';
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import myAxios from "./utils/myaxios"; // 추가된 코드
+
 function App() {
-
   const navigate = useNavigate();
-
+  const [activeNav, setActiveNav] = useState(1);
   useEffect(() => {
     const refreshTokenInterval = setInterval(async () => {
       const loginInfo = JSON.parse(localStorage.getItem("loginInfo"));
 
-      console.log(loginInfo);
+
+
+
+
       if (loginInfo) {
-        const {accessToken, refreshToken} = loginInfo; // 수정된 코드
+        const { accessToken, refreshToken } = loginInfo; // 수정된 코드
 
         try {
           const response = await myAxios.post(
-              "/members/refreshToken",
-              {refreshToken}, // refreshToken을 별도의 객체로 보냅니다.
-              {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-              }
+            "/members/refreshToken",
+            { refreshToken }, // refreshToken을 별도의 객체로 보냅니다.
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
           );
 
           const loginInfo = response.data;
@@ -65,34 +68,38 @@ function App() {
     };
   }, []);
 
-    return (
-        <div className="App">
-
-          <BottomNav/>
-
-          <Routes>
-            <Route path="/" element={<Main/>}/>
-            <Route path="/Main" element={<Main/>}/>
-            <Route path="/Diary" element={<Diary/>}/>
-            <Route path="/MyPage" element={<MyPage/>}/>
-            <Route path="/Closet" element={<Closet/>}/>
-            <Route path="/ItemHave" element={<ItemHave/>}/>
-            <Route path="/ItemSeason" element={<ItemSeason/>}/>
-            <Route path="/ItemFrequently" element={<ItemFrequently/>}/>
-            <Route path="/ItemNotRecently" element={<ItemNotRecently/>}/>
-            <Route path="/ClothingForm" element={<ClothingForm/>}/>
-            <Route path="/clothes/:id" element={<ClothesDetail/>}/>
-            <Route path="/ClothingRecommendation" element={<ClothingRecommendation/>}/>
-            <Route path="/ClothingUpdateForm/:id" element={<ClothingUpdateForm/>}/>
-            <Route path="/DiaryAdd" element={<DiaryAdd/>}/>
-            <Route path="/DiaryDetail/:id" element={<DiaryDetail/>}/>
-            <Route path="/LoginForm" element={<LoginForm/>}/>
-            <Route path="/JoinForm" element={<JoinForm/>}/>
-            <Route path="/MyPage2" element={<MyPage2/>}/>
-          </Routes>
-        </div>
-    );
-  }
+  return (
+    <div className="App">
+      {/*<BottomNav />*/}
+      <BottomNav activeNav={activeNav} setActiveNav={setActiveNav} />
+      <Routes>
+        <Route path="/" element={<Main />} />
+        <Route path="/Main" element={<Main />} />
+        <Route path="/Diary" element={<Diary />} />
+        <Route path="/MyPage" element={<MyPage />} />
+        <Route path="/Closet" element={<Closet />} />
+        <Route path="/ItemHave" element={<ItemHave />}  />
+        <Route path="/ItemSeason" element={<ItemSeason />} />
+        <Route path="/ItemFrequently" element={<ItemFrequently />} />
+        <Route path="/ItemNotRecently" element={<ItemNotRecently />} />
+        <Route path="/ClothingForm" element={<ClothingForm />} />
+        <Route path="/clothes/:id" element={<ClothesDetail />} />
+        <Route
+          path="/ClothingRecommendation"
+          element={<ClothingRecommendation />}
+        />
+        <Route
+          path="/ClothingUpdateForm/:id"
+          element={<ClothingUpdateForm />}
+        />
+        <Route path="/DiaryAdd" element={<DiaryAdd />} />
+        <Route path="/DiaryDetail/:id" element={<DiaryDetail />} />
+        <Route path="/LoginForm" element={<LoginForm />} />
+        <Route path="/JoinForm" element={<JoinForm />} />
+        <Route path="/MyPage2" element={<MyPage2 />} />
+      </Routes>
+    </div>
+  );
+}
 
 export default App;
-

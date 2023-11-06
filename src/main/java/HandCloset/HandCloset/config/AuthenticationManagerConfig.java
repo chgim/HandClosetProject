@@ -21,8 +21,8 @@ public class AuthenticationManagerConfig extends AbstractHttpConfigurer<Authenti
         AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
 
         builder.addFilterBefore(
-                new JwtAuthenticationFilter(authenticationManager),
-                UsernamePasswordAuthenticationFilter.class)
+                        new JwtAuthenticationFilter(authenticationManager),
+                        UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(jwtAuthenticationProvider);
     }
 }

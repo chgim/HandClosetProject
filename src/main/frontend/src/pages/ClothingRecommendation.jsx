@@ -12,12 +12,22 @@ const ClothingRecommendation = () => {
   const [recommendedClothes, setRecommendedClothes] = useState([]);
   const [apiToCall, setApiToCall] = useState("/api/clothing/recommendation"); // Default API
   const [activeButton, setActiveButton] = useState("many");
-
+  const loginInfo = JSON.parse(localStorage.getItem("loginInfo"));
   const navigate = useNavigate();
   // 이미지 가져오기
+  useEffect(() => {
+
+    if (!loginInfo || !loginInfo.accessToken) {
+      navigate("/LoginForm");
+    }
+  }, [loginInfo, navigate]);
   const fetchImage = async (id) => {
     try {
       const response = await axios.get(`/api/clothing/images/${id}`, {
+        headers: {
+          Authorization: `Bearer ${loginInfo.accessToken}`,
+        },
+        data: { refreshToken: loginInfo.refreshToken },
         responseType: "arraybuffer",
       });
       const imageBytes = new Uint8Array(response.data);
@@ -37,6 +47,10 @@ const ClothingRecommendation = () => {
           encodeURIComponent(subcategory)
         );
         const response = await axios.get(apiToCall, {
+          headers: {
+            Authorization: `Bearer ${loginInfo.accessToken}`,
+          },
+          data: { refreshToken: loginInfo.refreshToken },
           params: { subcategories: encodedSubcategories },
           paramsSerializer: (params) => {
             return qs.stringify(params, { arrayFormat: "repeat" });
@@ -71,13 +85,18 @@ const ClothingRecommendation = () => {
     setApiToCall(apiEndpoint);
     setActiveButton(buttonType);
   };
-  const handleRandomButtonClick = async () => {
+  const handleRandomButtonClick = async (apiEndpoint,buttonType) => {
     try {
       const encodedSubcategories = subcategories.map((subcategory) =>
         encodeURIComponent(subcategory)
       );
       const response = await axios.get("/api/clothing/RandomRecommendation", {
+        headers: {
+          Authorization: `Bearer ${loginInfo.accessToken}`,
+        },
         params: { subcategories: encodedSubcategories },
+
+        data: { refreshToken: loginInfo.refreshToken },
         paramsSerializer: (params) => {
           return qs.stringify(params, { arrayFormat: "repeat" });
         },
@@ -95,6 +114,7 @@ const ClothingRecommendation = () => {
       );
 
       setRecommendedClothes(updatedClothes);
+      setActiveButton(buttonType);
     } catch (error) {
       console.error("Error fetching recommended clothes:", error);
     }

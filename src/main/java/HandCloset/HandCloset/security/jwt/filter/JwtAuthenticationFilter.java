@@ -2,9 +2,8 @@ package HandCloset.HandCloset.security.jwt.filter;
 
 
 import HandCloset.HandCloset.security.jwt.exception.JwtExceptionCode;
+import HandCloset.HandCloset.security.jwt.provider.JwtAuthenticationProvider;
 import HandCloset.HandCloset.security.jwt.token.JwtAuthenticationToken;
-
-
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -17,10 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.*;
+import javax.servlet.http.*;
 import java.io.IOException;
 
 @RequiredArgsConstructor
@@ -76,8 +73,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void getAuthentication(String token) {
         JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(token);
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
-        SecurityContextHolder.getContext()
-                .setAuthentication(authenticate);
+        // 이 객체에는 JWT안의 내용을 가지고 로그인 id,role
+
+        SecurityContextHolder.getContext().setAuthentication(authenticate); // 현재 요청에서 언제든지 인증정보를 꺼낼 수 있도록 해준다.
     }
 
     private String getToken(HttpServletRequest request) {
