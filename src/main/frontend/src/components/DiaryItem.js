@@ -5,12 +5,12 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function DiaryItem({
-  category,
-  subcategory,
-  items,
-  selectedImageIds,
-  setSelectedImageIds,
-}) {
+                     category,
+                     subcategory,
+                     items,
+                     selectedImageIds,
+                     setSelectedImageIds,
+                   }) {
   const [ids, setIds] = useState([]); // ID 목록 상태 추가
   const navigate = useNavigate();
   const [images, setImages] = useState([]);
@@ -88,10 +88,10 @@ function DiaryItem({
   useEffect(() => {
     const fetchData = async () => {
       const images = await Promise.all(
-        items.map(async (item) => {
-          const imageUrl = await getImageSrc(item.id, category, item);
-          return { item, imageUrl };
-        })
+          items.map(async (item) => {
+            const imageUrl = await getImageSrc(item.id, category, item);
+            return { item, imageUrl };
+          })
       );
       setImages(images);
     };
@@ -99,20 +99,20 @@ function DiaryItem({
   }, [items]);
 
   return (
-    <div>
-      <ImageGrid>
-        {images.map(({ item, imageUrl, index }) => (
-          <ImageItem
-            key={item.id}
-            isSelected={selectedImageIds.includes(item.id)}
-            onClick={() => toggleImageSelection(item.id)}
-          >
-            <ItemImage src={imageUrl} alt={item.name} />
-            <p>{item.name}</p>
-          </ImageItem>
-        ))}
-      </ImageGrid>
-    </div>
+      <div>
+        <ImageGrid>
+          {images.map(({ item, imageUrl, index }) => (
+              <ImageItem
+                  key={item.id}
+                  isSelected={selectedImageIds.includes(item.id)}
+                  onClick={() => toggleImageSelection(item.id)}
+              >
+                <ItemImage src={imageUrl} alt={item.name} />
+                <p>{item.name}</p>
+              </ImageItem>
+          ))}
+        </ImageGrid>
+      </div>
   );
 }
 
@@ -132,7 +132,7 @@ const ImageItem = styled.div`
   padding-bottom: 100%; /* 정사각형 비율을 유지하기 위한 패딩 */
   overflow: hidden;
   border: ${({ isSelected }) =>
-    isSelected ? "1px solid red" : "1px solid lightgray"};
+      isSelected ? "1px solid red" : "1px solid lightgray"};
   border-radius: 18px;
 `;
 
