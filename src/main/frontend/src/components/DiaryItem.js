@@ -17,56 +17,62 @@ function DiaryItem({
   const loginInfo = JSON.parse(localStorage.getItem("loginInfo"));
 
 
+  
   useEffect(() => {
-
     if (!loginInfo || !loginInfo.accessToken) {
       navigate("/LoginForm");
+    }else{
+
+
+      const fetchIds = async () => {
+        try {
+          const clothesIds = await getAllClothesIds(); // 모든 의류의 ID 목록 가져오기
+          console.log(clothesIds);
+          setIds(clothesIds);
+        } catch (error) {
+          console.error("Failed to fetch clothes ids:", error);
+        }
+      };
+
+      fetchIds();
     }
-  }, [loginInfo, navigate]);
+  }, [category]);
 
-  useEffect(() => {
-    const fetchIds = async () => {
-      try {
-        const clothesIds = await getAllClothesIds(); // 모든 의류의 ID 목록 가져오기
-        console.log(clothesIds);
-        setIds(clothesIds);
-      } catch (error) {
-        console.error("Failed to fetch clothes ids:", error);
-      }
-    };
-
-    fetchIds();
-  }, []);
-  const toggleImageSelection = (imageId) => {
+  const toggleImageSelection = (index) => {
     setSelectedImageIds((prevSelectedImageIds) => {
-      if (prevSelectedImageIds.includes(imageId)) {
-        return prevSelectedImageIds.filter((id) => id !== imageId);
+      const selectedId = category === "전체" ? ids[index] : items[index].id;
+      if (prevSelectedImageIds.includes(selectedId)) {
+        return prevSelectedImageIds.filter((id) => id !== selectedId);
       } else {
-        return [...prevSelectedImageIds, imageId];
+        return [...prevSelectedImageIds, selectedId];
       }
     });
   };
-
-  const getImageSrc = async (id, category, item) => {
-
+  const getImageSrc = async (category, item, index, ids) => {
+    console.log("getImageSrc 호출");
     if (category === "전체") {
+      console.log("getImageSrc 전체 호출");
       try {
-        const response = await axios.get(`/api/clothing/images/${id}`, {
-          headers: {
-            Authorization: `Bearer ${loginInfo.accessToken}`,
-          },
-          responseType: "arraybuffer",
-        });
-        const arrayBufferView = new Uint8Array(response.data);
-        const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
-        return URL.createObjectURL(blob);
+        if(ids[index] !== undefined) {
+          const response = await axios.get(`/api/clothing/images/${ids[index]}`, {
+            headers: {
+              Authorization: `Bearer ${loginInfo.accessToken}`,
+            },
+            responseType: "arraybuffer",
+          });
+          const arrayBufferView = new Uint8Array(response.data);
+          const blob = new Blob([arrayBufferView], {type: "image/jpeg"});
+          return URL.createObjectURL(blob);
+        }else{
+          return null;
+        }
       } catch (error) {
         console.error("Failed to fetch image:", error);
         return null;
       }
     } else {
+      console.log("getImageSrc 다른 카테고리 호출");
       try {
-
         // 여기서도 마찬가지로 헤더에 토큰을 포함하여 요청합니다.
         const response = await axios.get(item.image, {
           headers: {
@@ -86,17 +92,18 @@ function DiaryItem({
   };
 
   useEffect(() => {
+    console.log("useEffect2 호출");
     const fetchData = async () => {
       const images = await Promise.all(
-          items.map(async (item) => {
-            const imageUrl = await getImageSrc(item.id, category, item);
-            return { item, imageUrl };
+          items.map(async (item, index) => {
+            const imageUrl = await getImageSrc(category, item,index,ids);
+            return { item, imageUrl,index };
           })
       );
       setImages(images);
     };
     fetchData();
-  }, [items]);
+  }, [category, ids, items]);
 
   return (
       <div>
@@ -104,8 +111,8 @@ function DiaryItem({
           {images.map(({ item, imageUrl, index }) => (
               <ImageItem
                   key={item.id}
-                  isSelected={selectedImageIds.includes(item.id)}
-                  onClick={() => toggleImageSelection(item.id)}
+                  isSelected={selectedImageIds.includes(category === "전체" ? ids[index] : item.id)}
+                  onClick={() => toggleImageSelection(index)}
               >
                 <ItemImage src={imageUrl} alt={item.name} />
                 <p>{item.name}</p>
