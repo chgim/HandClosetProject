@@ -13,6 +13,9 @@ const ClothingRecommendation = () => {
   const [apiToCall, setApiToCall] = useState("/api/clothing/recommendation"); // Default API
   const [activeButton, setActiveButton] = useState("many");
   const loginInfo = JSON.parse(localStorage.getItem("loginInfo"));
+  const [activeButtonBottom, setActiveButtonBottom] = useState("");
+  const [tpoButtonsVisible, setTPOButtonsVisible] = useState(false);
+  const [tpoSubcategories, setTpoSubcategories] = useState([]);
   const navigate = useNavigate();
   // 이미지 가져오기
   useEffect(() => {
@@ -44,7 +47,7 @@ const ClothingRecommendation = () => {
       console.log("fetchRecommendedClothes 함수 호출!!");
       try {
         const encodedSubcategories = subcategories.map((subcategory) =>
-          encodeURIComponent(subcategory)
+            encodeURIComponent(subcategory)
         );
         const response = await axios.get(apiToCall, {
           headers: {
@@ -60,13 +63,13 @@ const ClothingRecommendation = () => {
 
         // 이미지 가져오기
         const updatedClothes = await Promise.all(
-          data.map(async (clothes) => {
-            const imageUrl = await fetchImage(clothes.id);
-            return {
-              ...clothes,
-              imageUrl: imageUrl,
-            };
-          })
+            data.map(async (clothes) => {
+              const imageUrl = await fetchImage(clothes.id);
+              return {
+                ...clothes,
+                imageUrl: imageUrl,
+              };
+            })
         );
 
         setRecommendedClothes(updatedClothes);
@@ -85,10 +88,11 @@ const ClothingRecommendation = () => {
     setApiToCall(apiEndpoint);
     setActiveButton(buttonType);
   };
+
   const handleRandomButtonClick = async (apiEndpoint,buttonType) => {
     try {
       const encodedSubcategories = subcategories.map((subcategory) =>
-        encodeURIComponent(subcategory)
+          encodeURIComponent(subcategory)
       );
       const response = await axios.get("/api/clothing/RandomRecommendation", {
         headers: {
@@ -104,13 +108,13 @@ const ClothingRecommendation = () => {
       const data = response.data;
 
       const updatedClothes = await Promise.all(
-        data.map(async (clothes) => {
-          const imageUrl = await fetchImage(clothes.id);
-          return {
-            ...clothes,
-            imageUrl: imageUrl,
-          };
-        })
+          data.map(async (clothes) => {
+            const imageUrl = await fetchImage(clothes.id);
+            return {
+              ...clothes,
+              imageUrl: imageUrl,
+            };
+          })
       );
 
       setRecommendedClothes(updatedClothes);
@@ -119,6 +123,41 @@ const ClothingRecommendation = () => {
       console.error("Error fetching recommended clothes:", error);
     }
   };
+
+  const handleTpoClick = async () => {
+    try {
+      const encodedSubcategories = tpoSubcategories.map((subcategory) =>
+          encodeURIComponent(subcategory)
+      );
+      const response = await axios.get("/api/clothing/RandomRecommendation", {
+        headers: {
+          Authorization: `Bearer ${loginInfo.accessToken}`,
+        },
+        params: { subcategories: encodedSubcategories },
+
+        data: { refreshToken: loginInfo.refreshToken },
+        paramsSerializer: (params) => {
+          return qs.stringify(params, { arrayFormat: "repeat" });
+        },
+      });
+      const data = response.data;
+
+      const updatedClothes = await Promise.all(
+          data.map(async (clothes) => {
+            const imageUrl = await fetchImage(clothes.id);
+            return {
+              ...clothes,
+              imageUrl: imageUrl,
+            };
+          })
+      );
+
+      setRecommendedClothes(updatedClothes);
+    } catch (error) {
+      console.error("Error fetching recommended clothes:", error);
+    }
+  };
+
 
   const GloStyle = createGlobalStyle`
       @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
@@ -164,164 +203,189 @@ const ClothingRecommendation = () => {
   `;
 
   return (
-    <div>
-      <GloStyle />
-      <BackButton onClick={() => navigate("/Main")}>
-        <img src={back} alt="back" style={{ width: "28px" }} />
-      </BackButton>
-      <ButtonContainer>
-        <Button
-          onClick={() =>
-            handleButtonClick("/api/clothing/recommendation", "many")
-          }
-          active={activeButton === "many"}
-          style={{ borderRadius: "10px 0px 0px 10px" }}
-        >
-          많이 입은
-        </Button>
-        <Button
-          onClick={() =>
-            handleButtonClick("/api/clothing/recommendation2", "few")
-          }
-          active={activeButton === "few"}
-        >
-          적게 입은
-        </Button>
-        <Button>TPO별 코디</Button>
-        <Button
-          style={{ borderRadius: "0px 10px 10px 0px" }}
-          onClick={() =>
-            handleRandomButtonClick(
-              "/api/clothing/RandomRecommendation",
-              "random"
-            )
-          }
-          active={activeButton === "random"}
-        >
-          랜덤 추천
-        </Button>
-      </ButtonContainer>
+      <div>
+        <GloStyle />
+        <BackButton onClick={() => navigate("/Main")}>
+          <img src={back} alt="back" style={{ width: "28px" }} />
+        </BackButton>
+        <ButtonContainer>
+          <Button
+              onClick={() =>
+                  handleButtonClick("/api/clothing/recommendation", "many")
+              }
+              active={activeButton === "many"}
+              style={{ borderRadius: "10px 0px 0px 10px" }}
+          >
+            많이 입은
+          </Button>
+          <Button
+              onClick={() =>
+                  handleButtonClick("/api/clothing/recommendation2", "few")
+              }
+              active={activeButton === "few"}
+          >
+            적게 입은
+          </Button>
+          <Button
+              onClick={() =>{
+                setTPOButtonsVisible(true);
+                setActiveButton("tpo");
+                setActiveButtonBottom("casual");}}
+              active={activeButton === "tpo"}>TPO 코디</Button>
+          <Button
+              style={{ borderRadius: "0px 10px 10px 0px" }}
+              onClick={() =>
+                  handleRandomButtonClick(
+                      "/api/clothing/RandomRecommendation",
+                      "random"
+                  )
+              }
+              active={activeButton === "random"}
+          >
+            랜덤 추천
+          </Button>
+        </ButtonContainer>
+        {tpoButtonsVisible && (
+            <ButtonContainer>
+              <Button style={{borderRadius: "10px 0px 0px 10px"}}
+                      onClick={() => {
+                        setActiveButtonBottom("casual");
+                        const tpostring = "트렌치코트,코트,자켓/점퍼,야상,무스탕,패딩,후드집업,가디건/베스트,민소매,반팔티,긴팔티,블라우스/셔츠,맨투맨/후디,니트,반바지,치마,면바지,청바지,트레이닝/조거"
+                        setTpoSubcategories(tpostring.split(","))
+                        handleTpoClick()
+                      }} active={activeButtonBottom === "casual"}
+              >캐주얼</Button>
+              <Button style={{borderRadius: "0px 10px 10px 0px"}}
+                      onClick={()=> {
+                        setActiveButtonBottom("formal");
+                        const tpostring = "트렌치코트,코트,가디건/베스트,블레이저,반팔티,긴팔티,블라우스/셔츠,니트,치마,슬렉스"
+                        setTpoSubcategories(tpostring.split(","))
+                        handleTpoClick()
+                      }}active={activeButtonBottom === "formal"}
+              >포멀</Button>
+            </ButtonContainer>)
+        }
 
-      {/*<hr*/}
-      {/*  style={{*/}
-      {/*    height: "1px",*/}
-      {/*    marginBottom: "50px",*/}
-      {/*    border: "0",*/}
-      {/*    backgroundColor: "lightgray",*/}
-      {/*  }}*/}
-      {/*/>*/}
-      <div
-        style={{
-          backgroundColor: "#EFEFEF",
-          border: "0",
-          width: "82%",
-          marginLeft: "9%",
-          marginTop: "50px",
-          paddingTop: "30px",
-          paddingBottom: "10px",
-          borderRadius: "18px",
-        }}
-      >
-        {recommendedClothes.length > 0 ? (
-          <div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                marginBottom: "40px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center" }}>
+        {/*<hr*/}
+        {/*  style={{*/}
+        {/*    height: "1px",*/}
+        {/*    marginBottom: "50px",*/}
+        {/*    border: "0",*/}
+        {/*    backgroundColor: "lightgray",*/}
+        {/*  }}*/}
+        {/*/>*/}
+        <div
+            style={{
+              backgroundColor: "#EFEFEF",
+              border: "0",
+              width: "82%",
+              marginLeft: "9%",
+              marginTop: "50px",
+              paddingTop: "30px",
+              paddingBottom: "10px",
+              borderRadius: "18px",
+            }}
+        >
+          {recommendedClothes.length > 0 ? (
+              <div>
+                <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      marginBottom: "40px",
+                    }}
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
                 <span
-                  style={{
-                    position: "absolute",
-                    left: "15%",
-                    fontWeight: "bold",
-                    color: "#333",
-                  }}
+                    style={{
+                      position: "absolute",
+                      left: "15%",
+                      fontWeight: "bold",
+                      color: "#333",
+                    }}
                 >
                   아우터 :&nbsp;
                 </span>
-                {recommendedClothes
-                  .filter((clothes) => clothes.category === "아우터")
-                  .slice(0, 2)
-                  .map((clothes) => (
-                    <StyledImage src={clothes.imageUrl} alt={clothes.id} />
-                  ))}
-                {recommendedClothes.filter(
-                  (clothes) => clothes.category === "아우터"
-                ).length === 0 && <span>옷이 없어요</span>}
-              </div>
-            </div>
+                    {recommendedClothes
+                        .filter((clothes) => clothes.category === "아우터")
+                        .slice(0, 2)
+                        .map((clothes) => (
+                            <StyledImage src={clothes.imageUrl} alt={clothes.id} />
+                        ))}
+                    {recommendedClothes.filter(
+                        (clothes) => clothes.category === "아우터"
+                    ).length === 0 && <span>옷이 없어요</span>}
+                  </div>
+                </div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                marginBottom: "40px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center" }}>
+                <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      marginBottom: "40px",
+                    }}
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
                 <span
-                  style={{
-                    position: "absolute",
-                    left: "15%",
-                    fontWeight: "bold",
-                    color: "#333",
-                  }}
+                    style={{
+                      position: "absolute",
+                      left: "15%",
+                      fontWeight: "bold",
+                      color: "#333",
+                    }}
                 >
                   상의 :&nbsp;
                 </span>
-                {recommendedClothes
-                  .filter((clothes) => clothes.category === "상의")
-                  .slice(0, 2)
-                  .map((clothes) => (
-                    <StyledImage src={clothes.imageUrl} alt={clothes.id} />
-                  ))}
-                {recommendedClothes.filter(
-                  (clothes) => clothes.category === "상의"
-                ).length === 0 && <span> 옷이 없어요</span>}
-              </div>
-            </div>
+                    {recommendedClothes
+                        .filter((clothes) => clothes.category === "상의")
+                        .slice(0, 2)
+                        .map((clothes) => (
+                            <StyledImage src={clothes.imageUrl} alt={clothes.id} />
+                        ))}
+                    {recommendedClothes.filter(
+                        (clothes) => clothes.category === "상의"
+                    ).length === 0 && <span> 옷이 없어요</span>}
+                  </div>
+                </div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                marginBottom: "40px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center" }}>
+                <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      marginBottom: "40px",
+                    }}
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
                 <span
-                  style={{
-                    position: "absolute",
-                    left: "15%",
-                    fontWeight: "bold",
-                    color: "#333",
-                  }}
+                    style={{
+                      position: "absolute",
+                      left: "15%",
+                      fontWeight: "bold",
+                      color: "#333",
+                    }}
                 >
                   하의 :&nbsp;
                 </span>
-                {recommendedClothes
-                  .filter((clothes) => clothes.category === "하의")
-                  .slice(0, 2)
-                  .map((clothes) => (
-                    <StyledImage src={clothes.imageUrl} alt={clothes.id} />
-                  ))}
-                {recommendedClothes.filter(
-                  (clothes) => clothes.category === "하의"
-                ).length === 0 && <span> 옷이 없어요</span>}
+                    {recommendedClothes
+                        .filter((clothes) => clothes.category === "하의")
+                        .slice(0, 2)
+                        .map((clothes) => (
+                            <StyledImage src={clothes.imageUrl} alt={clothes.id} />
+                        ))}
+                    {recommendedClothes.filter(
+                        (clothes) => clothes.category === "하의"
+                    ).length === 0 && <span> 옷이 없어요</span>}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ) : (
-          <p>추천할 옷이 존재하지 않습니다.</p>
-        )}
+          ) : (
+              <p>추천할 옷이 존재하지 않습니다.</p>
+          )}
+        </div>
       </div>
-    </div>
   );
 };
 

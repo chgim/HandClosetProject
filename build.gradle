@@ -23,7 +23,7 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	compileOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
+	implementation 'org.openpnp:opencv:4.5.1-1'
 	implementation 'com.google.code.gson:gson:2.8.6'
 	implementation 'com.auth0:java-jwt:3.10.3'
 	annotationProcessor 'org.projectlombok:lombok'

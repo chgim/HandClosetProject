@@ -8,6 +8,7 @@ import HandCloset.HandCloset.security.jwt.util.LoginUserDto;
 import HandCloset.HandCloset.security.jwt.util.UnauthorizedException;
 import HandCloset.HandCloset.service.ClothesService;
 import HandCloset.HandCloset.service.DiaryService;
+import HandCloset.HandCloset.utils.ImageProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,8 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 import java.net.URLDecoder;
-
-import org.springframework.http.HttpHeaders;
 
 import java.util.stream.Collectors;
 
@@ -69,9 +68,16 @@ public class ClothesController {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
             Clothes clothes = new Clothes();
+
+//            // 이미지 처리
+//          MultipartFile processedImage = ImageProcessor.resizeAndRemoveBackground(file);
+            MultipartFile processedImage = ImageProcessor.resizeImage(file,200,200);
+
             // 파일을 저장하고 저장된 경로를 DB에 저장합니다.
-//            String imagePath = clothesService.saveImage(file);
-            String imagePath = clothesService.saveImage(file, loginUserDto.getMemberId());
+            String imagePath = clothesService.saveImage(processedImage, loginUserDto.getMemberId());
+           // String imagePath = clothesService.saveImage(file, loginUserDto.getMemberId());
+
+
             clothes.setImgpath(imagePath);
             clothes.setCategory(category);
             clothes.setSubcategory(subcategory);
