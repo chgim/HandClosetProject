@@ -288,6 +288,7 @@ const Main = () => {
               <Right>
                 <City>{koreanCityCode}</City>
                 <Degree>{Math.round(weatherData.main.temp)}°C</Degree>
+                {/*<Degree>{Math.round(10)}°C</Degree>*/}
               </Right>
               <Bottom>
                 <Desdiv>

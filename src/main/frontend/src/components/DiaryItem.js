@@ -24,20 +24,28 @@ function DiaryItem({
     }else{
 
 
-      const fetchIds = async () => {
-        try {
-          const clothesIds = await getAllClothesIds(); // 모든 의류의 ID 목록 가져오기
-          console.log(clothesIds);
-          setIds(clothesIds);
-        } catch (error) {
-          console.error("Failed to fetch clothes ids:", error);
-        }
-      };
+    const fetchIds = async () => {
+      try {
+        const clothesIds = await getAllClothesIds(); // 모든 의류의 ID 목록 가져오기
+        console.log(clothesIds);
+        setIds(clothesIds);
+      } catch (error) {
+        console.error("Failed to fetch clothes ids:", error);
+      }
+    };
 
-      fetchIds();
+    fetchIds();
     }
   }, [category]);
-
+  // const toggleImageSelection = (imageId) => {
+  //   setSelectedImageIds((prevSelectedImageIds) => {
+  //     if (prevSelectedImageIds.includes(imageId)) {
+  //       return prevSelectedImageIds.filter((id) => id !== imageId);
+  //     } else {
+  //       return [...prevSelectedImageIds, imageId];
+  //     }
+  //   });
+  // };
   const toggleImageSelection = (index) => {
     setSelectedImageIds((prevSelectedImageIds) => {
       const selectedId = category === "전체" ? ids[index] : items[index].id;
@@ -64,8 +72,8 @@ function DiaryItem({
           const blob = new Blob([arrayBufferView], {type: "image/jpeg"});
           return URL.createObjectURL(blob);
         }else{
-          return null;
-        }
+            return null;
+          }
       } catch (error) {
         console.error("Failed to fetch image:", error);
         return null;
@@ -73,6 +81,7 @@ function DiaryItem({
     } else {
       console.log("getImageSrc 다른 카테고리 호출");
       try {
+
         // 여기서도 마찬가지로 헤더에 토큰을 포함하여 요청합니다.
         const response = await axios.get(item.image, {
           headers: {
