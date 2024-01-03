@@ -105,10 +105,4 @@ task copyReactBuildFiles(type: Copy) {
 	from "$frontendDir/build"
 	into "$projectDir/src/main/resources/static"
 }
-//
-//task copyNativeLibs(type: Copy) {
-//   from configurations.runtimeClasspath
-//   into project.buildDir
-//}
-//
-//tasks.build.dependsOn copyNativeLibs
+
