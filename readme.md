@@ -24,7 +24,7 @@
 
 
 ## 프로젝트 ppt
-
+https://github.com/chgim/HandClosetProject/blob/main/%EA%B0%9C%EC%9D%B8%20%EC%98%B7%EC%9E%A5%20%EC%8B%9C%EC%8A%A4%ED%85%9C%EC%9D%84%20%ED%99%9C%EC%9A%A9%ED%95%9C%20%EC%98%B7%EC%B0%A8%EB%A6%BC%20%EC%B6%94%EC%B2%9C%20%EC%9B%B9%EC%95%B1.pptx
 
 ## 보완점
 
