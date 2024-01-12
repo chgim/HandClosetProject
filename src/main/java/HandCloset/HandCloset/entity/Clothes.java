@@ -43,7 +43,9 @@ public class Clothes {
 
     private int wearcnt;
 
-    private Long memberId;
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     private Date createdate;
 
@@ -51,14 +53,13 @@ public class Clothes {
     @Column(updatable = false,nullable = false)
     private LocalDateTime regdate;
 
-    public Long getMemberId() {
-        return memberId;
+    public Member getMember() {
+        return member;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setMember(Member member) {
+        this.member = member;
     }
-
 
     public LocalDateTime getRegdate() {
         return regdate;

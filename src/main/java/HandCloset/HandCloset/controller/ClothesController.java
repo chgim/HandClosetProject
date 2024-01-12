@@ -8,6 +8,7 @@ import HandCloset.HandCloset.security.jwt.util.LoginUserDto;
 import HandCloset.HandCloset.security.jwt.util.UnauthorizedException;
 import HandCloset.HandCloset.service.ClothesService;
 import HandCloset.HandCloset.service.DiaryService;
+import HandCloset.HandCloset.service.MemberService;
 import HandCloset.HandCloset.utils.ImageProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -44,13 +45,15 @@ public class ClothesController {
     private final ClothesService clothesService;
 
     private final DiaryService diaryService;
+    private final MemberService memberService;
 
     @Value("${upload.directory}")
     private String uploadDirectory;
 
-    public ClothesController(ClothesService clothesService, DiaryService diaryService) {
+    public ClothesController(ClothesService clothesService, DiaryService diaryService, MemberService memberService) {
         this.clothesService = clothesService;
         this.diaryService = diaryService;
+        this.memberService = memberService;
     }
 
     @PostMapping
@@ -86,7 +89,7 @@ public class ClothesController {
             clothes.setColor(color);
 
 
-            clothes.setMemberId(loginUserDto.getMemberId());
+            clothes.setMember(memberService.findMemberById(loginUserDto.getMemberId()));
 
             return clothesService.saveClothes(clothes);
         }
@@ -148,7 +151,7 @@ public class ClothesController {
                 clothes.setColor(color);
             }
 
-            clothes.setMemberId(loginUserDto.getMemberId());
+            clothes.setMember(memberService.findMemberById(loginUserDto.getMemberId()));
 
 //        if(loginUserDto != null){
 //            clothes.setMemberId(loginUserDto.getMemberId());

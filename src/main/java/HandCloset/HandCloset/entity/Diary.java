@@ -30,7 +30,9 @@ public class Diary {
     private String season;
 
     private String thumbnailpath;
-    private Long memberId;
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     private String note;
 
@@ -53,12 +55,14 @@ public class Diary {
     }
 
     // Getters and setters
-    public Long getMemberId() {
-        return memberId;
+
+
+    public Member getMember() {
+        return member;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setMember(Member member) {
+        this.member = member;
     }
 
     public String getThumbnailpath() {

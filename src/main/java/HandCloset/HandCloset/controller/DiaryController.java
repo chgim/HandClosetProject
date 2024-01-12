@@ -8,6 +8,7 @@ import HandCloset.HandCloset.security.jwt.util.LoginUserDto;
 import HandCloset.HandCloset.security.jwt.util.UnauthorizedException;
 import HandCloset.HandCloset.service.ClothesService;
 import HandCloset.HandCloset.service.DiaryService;
+import HandCloset.HandCloset.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -37,9 +38,11 @@ public class DiaryController {
 
     private final DiaryService diaryService;
     private final ClothesService clothesService;
-    public DiaryController(DiaryService diaryService,ClothesService clothesService) {
+    private final MemberService memberService;
+    public DiaryController(DiaryService diaryService,ClothesService clothesService, MemberService memberService) {
         this.diaryService = diaryService;
         this.clothesService = clothesService;
+        this.memberService = memberService;
     }
 
     @PostMapping
@@ -68,7 +71,7 @@ public class DiaryController {
             diary.setSeason(season);
             diary.setNote(note);
             diary.setImageIds(imageIdList); // Set image IDs
-            diary.setMemberId(loginUserDto.getMemberId());
+            diary.setMember(memberService.findMemberById(loginUserDto.getMemberId()));
             Diary savedDiary = diaryService.saveDiary(diary);
 
             // Update wearcnt and createdate for each selected image

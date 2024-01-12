@@ -61,4 +61,9 @@ public class MemberService {
     public List<Member> getAllMembers() {
         return memberRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+    }
 }

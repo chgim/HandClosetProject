@@ -2,15 +2,18 @@ package HandCloset.HandCloset.service;
 
 import HandCloset.HandCloset.entity.Clothes;
 import HandCloset.HandCloset.entity.Diary;
+import HandCloset.HandCloset.entity.Member;
 import HandCloset.HandCloset.repository.ClothesRepository;
 import HandCloset.HandCloset.repository.DiaryRepository;
 
+import HandCloset.HandCloset.repository.MemberRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityNotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,9 +34,11 @@ public class DiaryService {
     private final DiaryRepository diaryRepository;
     private final ClothesService clothesService;
 
-    public DiaryService(DiaryRepository diaryRepository, ClothesService clothesService) {
+    private final MemberRepository memberRepository;
+    public DiaryService(DiaryRepository diaryRepository, ClothesService clothesService, MemberRepository memberRepository) {
         this.diaryRepository = diaryRepository;
         this.clothesService=clothesService;
+        this.memberRepository=memberRepository;
 
 
     }
@@ -64,19 +69,23 @@ public class DiaryService {
     }
     @Transactional(readOnly = true)
     public List<Diary> getAllDiaryEntries(Long memberId) {
-        return diaryRepository.findByMemberId(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        return diaryRepository.findByMember(member);
     }
     @Transactional(readOnly = true)
     public List<Diary> getDiaryEntriesByDate(Date date,Long memberId) {
-        return diaryRepository.findAllByDateAndMemberId(date,memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        return diaryRepository.findAllByDateAndMember(date,member);
     }
     @Transactional(readOnly = true)
     public Diary getDiaryEntryById(Long id,Long memberId) {
-        return diaryRepository.findByIdAndMemberId(id, memberId).orElse(null);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        return diaryRepository.findByIdAndMember(id, member).orElse(null);
     }
     @Transactional(readOnly = true)
     public List<Long> getImageIdsByDiaryId(Long diaryId,Long memberId) {
-        Diary diary = diaryRepository.findByIdAndMemberId(diaryId, memberId).orElse(null);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        Diary diary = diaryRepository.findByIdAndMember(diaryId, member).orElse(null);
         if (diary == null) {
             return Collections.emptyList();
         }
@@ -84,11 +93,13 @@ public class DiaryService {
     }
     @Transactional(readOnly = true)
     public List<Diary> findDiariesByImageId(Long imageId,Long memberId) {
-        return diaryRepository.findAllByImageIdsContainingAndMemberId(imageId,memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        return diaryRepository.findAllByImageIdsContainingAndMember(imageId,member);
     }
 
     public void deleteDiary(Long id,Long memberId) {
-        Diary diary = diaryRepository.findByIdAndMemberId(id,memberId).orElse(null);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        Diary diary = diaryRepository.findByIdAndMember(id,member).orElse(null);
         if (diary != null) {
             List<Long> imageIds = diary.getImageIds();
 
@@ -100,12 +111,13 @@ public class DiaryService {
                 }
             }
 
-            diaryRepository.deleteByIdAndMemberId(id,memberId);
+            diaryRepository.deleteByIdAndMember(id,member);
         }
     }
     //다른 클래스에서 활용하는 메서드
     public void deleteDiaryAndImage(Long id, Long memberId) {
-        Diary diary = diaryRepository.findByIdAndMemberId(id, memberId).orElse(null);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        Diary diary = diaryRepository.findByIdAndMember(id, member).orElse(null);
         if (diary != null) {
             List<Long> imageIds = diary.getImageIds();
 
@@ -120,7 +132,7 @@ public class DiaryService {
             // 이 부분에서 이미지 파일 삭제 로직 추가
             try {
                 // Check if the thumbnail is used in other diaries
-                List<Diary> diariesUsingThumbnail = diaryRepository.findAllByThumbnailpathAndMemberId(diary.getThumbnailpath(), memberId);
+                List<Diary> diariesUsingThumbnail = diaryRepository.findAllByThumbnailpathAndMember(diary.getThumbnailpath(), member);
 
                 if (diariesUsingThumbnail.size() == 1 && diariesUsingThumbnail.get(0).getId().equals(id)) {
                     // If the thumbnail is only used in the current diary, delete the thumbnail
@@ -135,21 +147,22 @@ public class DiaryService {
                 throw new RuntimeException("Failed to delete image and data.");
             }
 
-            diaryRepository.deleteByIdAndMemberId(id, memberId);
+            diaryRepository.deleteByIdAndMember(id, member);
         }
     }
 
     public void deleteAllDiaries(Long memberId){
         try {
             // Check if the thumbnail is used in other diaries
-            List<Diary> diaryList = diaryRepository.findByMemberId(memberId);
+            Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+            List<Diary> diaryList = diaryRepository.findByMember(member);
             for (Diary diary : diaryList){
                 String thumbnailPath = diary.getThumbnailpath();
                 String modifiedThumbnailPath = thumbnailPath.replace("\\", "/");
                 Path thumbnailFilePath = Paths.get(modifiedThumbnailPath);
                 Files.delete(thumbnailFilePath);
             }
-            diaryRepository.deleteByMemberId(memberId);
+            diaryRepository.deleteByMember(member);
         } catch (IOException e) {
             // Handle any IO exceptions if the image deletion fails
             e.printStackTrace();
@@ -158,17 +171,20 @@ public class DiaryService {
     }
     @Transactional(readOnly = true)
     public int getDiaryCount(Long memberId) {
-        return diaryRepository.countByMemberId(memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        return diaryRepository.countByMember(member);
     }
 
     @Transactional(readOnly = true)
     public List<Diary> findDiariesByThumbnailpath(String thumbnailpath, Long memberId) {
-        return diaryRepository.findAllByThumbnailpathAndMemberId(thumbnailpath, memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        return diaryRepository.findAllByThumbnailpathAndMember(thumbnailpath, member);
     }
 
 
     public Date findSecondLatestDateByImageId(Long imageId,Long memberId) {
-        List<Diary> diaries = diaryRepository.findAllByImageIdsContainingAndMemberId(imageId,memberId);
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        List<Diary> diaries = diaryRepository.findAllByImageIdsContainingAndMember(imageId,member);
         Date latestDate = null;
         Date secondLatestDate = null;
 
