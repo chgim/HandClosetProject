@@ -7,7 +7,7 @@
 - 개발 기간: 2023.05.14~
 - Programing Languages: Java 11, Html5, Css3, Javascript
 - Framework/ Library: react, Spring Boot, Spring Security, JWT
-- Server: H2, Apache Tomcat, Redis
+- Server: MySQL, Apache Tomcat, Redis
 - Tooling/ DevOps: GitHub, IntelliJ IDEA, Visual Studio Code, Postman 
 - Api: OpenWeather, kakaomap
 
