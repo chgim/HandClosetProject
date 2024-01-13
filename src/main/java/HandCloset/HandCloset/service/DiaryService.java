@@ -7,6 +7,7 @@ import HandCloset.HandCloset.repository.ClothesRepository;
 import HandCloset.HandCloset.repository.DiaryRepository;
 
 import HandCloset.HandCloset.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,8 @@ import java.util.Optional;
 
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DiaryService {
 
     @Value("C:/DiaryImageStorage")
@@ -35,19 +38,13 @@ public class DiaryService {
     private final ClothesService clothesService;
 
     private final MemberRepository memberRepository;
-    public DiaryService(DiaryRepository diaryRepository, ClothesService clothesService, MemberRepository memberRepository) {
-        this.diaryRepository = diaryRepository;
-        this.clothesService=clothesService;
-        this.memberRepository=memberRepository;
 
-
-    }
-
+    @Transactional
     public Diary saveDiary(Diary diary) {
         return diaryRepository.save(diary);
     }
 
-
+    @Transactional
     public String saveThumbnail(MultipartFile file, Long memberId) {
         try {
             // 사용자별 디렉토리 생성
@@ -67,22 +64,22 @@ public class DiaryService {
             return null;
         }
     }
-    @Transactional(readOnly = true)
+
     public List<Diary> getAllDiaryEntries(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return diaryRepository.findByMember(member);
     }
-    @Transactional(readOnly = true)
+
     public List<Diary> getDiaryEntriesByDate(Date date,Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return diaryRepository.findAllByDateAndMember(date,member);
     }
-    @Transactional(readOnly = true)
+
     public Diary getDiaryEntryById(Long id,Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return diaryRepository.findByIdAndMember(id, member).orElse(null);
     }
-    @Transactional(readOnly = true)
+
     public List<Long> getImageIdsByDiaryId(Long diaryId,Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         Diary diary = diaryRepository.findByIdAndMember(diaryId, member).orElse(null);
@@ -91,12 +88,12 @@ public class DiaryService {
         }
         return diary.getImageIds();
     }
-    @Transactional(readOnly = true)
+
     public List<Diary> findDiariesByImageId(Long imageId,Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return diaryRepository.findAllByImageIdsContainingAndMember(imageId,member);
     }
-
+    @Transactional
     public void deleteDiary(Long id,Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         Diary diary = diaryRepository.findByIdAndMember(id,member).orElse(null);
@@ -114,7 +111,7 @@ public class DiaryService {
             diaryRepository.deleteByIdAndMember(id,member);
         }
     }
-    //다른 클래스에서 활용하는 메서드
+    @Transactional
     public void deleteDiaryAndImage(Long id, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         Diary diary = diaryRepository.findByIdAndMember(id, member).orElse(null);
@@ -150,7 +147,7 @@ public class DiaryService {
             diaryRepository.deleteByIdAndMember(id, member);
         }
     }
-
+    @Transactional
     public void deleteAllDiaries(Long memberId){
         try {
             // Check if the thumbnail is used in other diaries
@@ -169,13 +166,13 @@ public class DiaryService {
             throw new RuntimeException("Failed to delete");
         }
     }
-    @Transactional(readOnly = true)
+
     public int getDiaryCount(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return diaryRepository.countByMember(member);
     }
 
-    @Transactional(readOnly = true)
+
     public List<Diary> findDiariesByThumbnailpath(String thumbnailpath, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return diaryRepository.findAllByThumbnailpathAndMember(thumbnailpath, member);

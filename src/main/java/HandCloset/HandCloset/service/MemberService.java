@@ -14,11 +14,12 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
 
-    @Transactional(readOnly = true)
+
     public Member findByEmail(String email){
         return memberRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("해당 사용자가 없습니다."));
     }
@@ -31,7 +32,7 @@ public class MemberService {
         return saveMember;
     }
 
-    @Transactional(readOnly = true)
+
     public Optional<Member> getMember(Long memberId){
         return memberRepository.findById(memberId);
     }
@@ -57,12 +58,12 @@ public class MemberService {
         // 저장
         memberRepository.save(member);
     }
-    @Transactional(readOnly = true)
+
     public List<Member> getAllMembers() {
         return memberRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
+
     public Member findMemberById(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
     }

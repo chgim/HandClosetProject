@@ -3,6 +3,7 @@ package HandCloset.HandCloset.service;
 import HandCloset.HandCloset.entity.Diary;
 import HandCloset.HandCloset.entity.Member;
 import HandCloset.HandCloset.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import HandCloset.HandCloset.entity.Clothes;
 import HandCloset.HandCloset.repository.ClothesRepository;
@@ -21,6 +22,8 @@ import java.util.*;
 
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ClothesService {
     @Value("${upload.directory}")
     private String uploadDirectory;
@@ -28,25 +31,22 @@ public class ClothesService {
 
     private final MemberRepository memberRepository;
 
-    public ClothesService(ClothesRepository clothesRepository, MemberRepository memberRepository) {
-        this.clothesRepository = clothesRepository;
-        this.memberRepository = memberRepository;
-    }
 
+    @Transactional
     public Clothes saveClothes(Clothes clothes) {
         return clothesRepository.save(clothes);
     }
-    @Transactional(readOnly = true)
+
     public Clothes getClothes(Long id, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findByIdAndMember(id, member).orElse(null);
     }
-    @Transactional(readOnly = true)
+
     public List<Clothes> getAllClothes( Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findByMember(member);
     }
-
+    @Transactional
     public void deleteClothes(Long id,Long memberId) {
         try {
             Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
@@ -56,7 +56,7 @@ public class ClothesService {
             throw new EntityNotFoundException("Clothes entity with id " + id + " does not exist.");
         }
     }
-    //다른 클래스에서 활용하는 메서드
+    @Transactional
     public void deleteClothesAndImage(Long id,Long memberId) {
         try {
             Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
@@ -82,6 +82,7 @@ public class ClothesService {
             throw new EntityNotFoundException("Clothes entity with id " + id + " does not exist.");
         }
     }
+    @Transactional
     public void deleteAllClothes(Long memberId) {
         try {
             Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
@@ -103,27 +104,28 @@ public class ClothesService {
         }
     }
 
-    @Transactional(readOnly = true)
+
     public int getClothesCount(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.countByMember(member);
     }
 
-    @Transactional(readOnly = true)
+
     public List<Clothes> getClothesByCategory(String category,Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findByCategoryAndMember(category,member);
     }
-    @Transactional(readOnly = true)
+
     public List<Clothes> getClothesBySubcategory(String subcategory,Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findBySubcategoryAndMember(subcategory,member);
     }
-    @Transactional(readOnly = true)
+
     public List<Clothes> getClothesByCategoryAndSubcategory(String category, String subcategory,Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findByCategoryAndSubcategoryAndMember(category, subcategory,member);
     }
+    @Transactional
     public String saveImage(MultipartFile file, Long memberId) {
         try {
             // 사용자별 디렉토리 생성
@@ -144,7 +146,7 @@ public class ClothesService {
         }
     }
 
-    @Transactional(readOnly = true)
+
     public Map<String, Integer> getCategoryItemCountForClothes(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         List<Clothes> allClothes = clothesRepository.findByMember(member);
@@ -161,7 +163,7 @@ public class ClothesService {
     }
 
     ///
-    @Transactional(readOnly = true)
+
     public Map<String, Integer> getSeasonStatistics(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         List<Clothes> clothesList = clothesRepository.findByMember(member);
@@ -176,38 +178,39 @@ public class ClothesService {
 
         return statistics;
     }
-    @Transactional(readOnly = true)
+
     public List<Clothes> getTopItems(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findTop5ByMemberOrderByWearcntDesc(member);
     }
 
-    @Transactional(readOnly = true)
+
     public List<Clothes> getBottomItems(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findTop5ByMemberOrderByCreatedateAsc(member);
     }
     ///
-    @Transactional(readOnly = true)
+
     public List<Clothes> getFilteredClothes(String subcategory, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findBySubcategoryAndMember(subcategory, member);
     }
-    @Transactional(readOnly = true)
+
     public List<Clothes> getRecommendedClothes(String subcategory, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findTop2BySubcategoryAndMemberOrderByWearcntDesc(subcategory, member);
     }
-    @Transactional(readOnly = true)
+
     public List<Clothes> getRecommendedClothesAsc(String subcategory, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findTop2BySubcategoryAndMemberOrderByCreatedateAsc(subcategory, member);
     }
-    @Transactional(readOnly = true)
+
     public List<Clothes> getRandomRecommendedClothes(String subcategory, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.getRandomRecommendedClothes(subcategory, member);
     }
+    @Transactional
     public void updateWearCountAndCreateDateOnCreate(Long imageId, Date date, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         Optional<Clothes> optionalClothes = clothesRepository.findByIdAndMember(imageId, member);
@@ -220,7 +223,7 @@ public class ClothesService {
             clothesRepository.save(clothes);
         });
     }
-
+    @Transactional
     public void updateWearCountAndCreateDateOnDelete(Long imageId, Date date, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         Optional<Clothes> optionalClothes = clothesRepository.findByIdAndMember(imageId, member);
@@ -232,7 +235,7 @@ public class ClothesService {
             clothesRepository.save(clothes);
         });
     }
-    @Transactional(readOnly = true)
+
     public List<Clothes> getClothesByImageIds(List<Long> imageIds, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findByIdInAndMember(imageIds, member);
