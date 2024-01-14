@@ -41,4 +41,6 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
     void deleteByMember(Member member);
 
     int countByMember(Member member);
+
+    List<Clothes> findByImgpathAndMember(String imgpath, Member member);
 }

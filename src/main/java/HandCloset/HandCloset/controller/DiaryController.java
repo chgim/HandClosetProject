@@ -90,17 +90,19 @@ public class DiaryController {
                     String modifiedThumbnailPath = thumbnailPath.replace("\\", "/");
                     Path thumbnailFilePath = Paths.get(modifiedThumbnailPath);
                     Files.delete(thumbnailFilePath);
+                    System.out.println("Files.delete(thumbnailFilePath);");
                 }
 
 
                 diaryService.deleteDiary(id, loginUserDto.getMemberId());
-
+                System.out.println("diaryService.deleteDiary(id, loginUserDto.getMemberId());");
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Failed to delete image and data.");
             }
         }
     }
+
 
 
     @GetMapping("/count")
@@ -120,8 +122,8 @@ public class DiaryController {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-        List<Diary> diaryEntries = diaryService.getAllDiaryEntries(loginUserDto.getMemberId());
-        return new ResponseEntity<>(diaryEntries, HttpStatus.OK);
+            List<Diary> diaryEntries = diaryService.getAllDiaryEntries(loginUserDto.getMemberId());
+            return new ResponseEntity<>(diaryEntries, HttpStatus.OK);
         }
     }
     @GetMapping("/entry")
@@ -150,7 +152,7 @@ public class DiaryController {
     }
 
     @GetMapping(value = "/images")
-     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<byte[]> getDiaryImage(@IfLogin LoginUserDto loginUserDto,@RequestParam String thumbnailpath) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");

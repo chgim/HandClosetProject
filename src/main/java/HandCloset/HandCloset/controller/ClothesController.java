@@ -1,4 +1,3 @@
-
 package HandCloset.HandCloset.controller;
 import HandCloset.HandCloset.entity.Clothes;
 import HandCloset.HandCloset.entity.Diary;
@@ -86,17 +85,17 @@ public class ClothesController {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-                Clothes clothes = clothesService.getClothes(id, loginUserDto.getMemberId());
+            Clothes clothes = clothesService.getClothes(id, loginUserDto.getMemberId());
 
-                clothes.setCategory(category);
-                clothes.setSubcategory(subcategory);
-                clothes.setSeason(season);
-                clothes.setDescription(description);
-                clothes.setColor(color);
-                clothes.setMember(memberService.findMemberById(loginUserDto.getMemberId()));
+            clothes.setCategory(category);
+            clothes.setSubcategory(subcategory);
+            clothes.setSeason(season);
+            clothes.setDescription(description);
+            clothes.setColor(color);
+            clothes.setMember(memberService.findMemberById(loginUserDto.getMemberId()));
 
 
-                return clothesService.saveClothes(clothes);
+            return clothesService.saveClothes(clothes);
         }
 
     }
@@ -144,37 +143,41 @@ public class ClothesController {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
 
-        try {
-            Clothes clothes = clothesService.getClothes(id, loginUserDto.getMemberId());
-            String imagePath = clothes.getImgpath();
-            // 파일 경로 구분자 수정
-            String modifiedImagePath = imagePath.replace("\\", "/");
-            Path imageFilePath = Paths.get(modifiedImagePath);
+            try {
+                Clothes clothes = clothesService.getClothes(id, loginUserDto.getMemberId());
+                String imagePath = clothes.getImgpath();
+                // 파일 경로 구분자 수정
+                boolean isImageUsedByOtherClothes = clothesService.isImageUsedByOtherClothes(imagePath, loginUserDto.getMemberId(), id);
 
-            // 파일 시스템에서 이미지 삭제
-            Files.delete(imageFilePath);
+                // imagePath와 member로 해당 이미지 사용중인지 파악
+                if (!isImageUsedByOtherClothes) {
+                    // 파일 경로 구분자 수정
+                    String modifiedImagePath = imagePath.replace("\\", "/");
+                    Path imageFilePath = Paths.get(modifiedImagePath);
 
-            // 다이어리 엔트리에서 해당 의류 아이템의 ID를 참조하는 경우 삭제 처리
-
-            List<Diary> referencingDiaries = diaryService.findDiariesByImageId(id,loginUserDto.getMemberId());
-            for (Diary diary : referencingDiaries) {
-                diary.getImageIds().remove(id);
-
-                // 이미지 ID 목록이 비어 있다면 다이어리를 삭제
-                if (diary.getImageIds().isEmpty()) {
-                    diaryService.deleteDiaryAndImage(diary.getId(), loginUserDto.getMemberId());
+                    // 파일 시스템에서 이미지 삭제
+                    Files.delete(imageFilePath);
                 }
+
+                List<Diary> referencingDiaries = diaryService.findDiariesByImageId(id,loginUserDto.getMemberId());
+                for (Diary diary : referencingDiaries) {
+                    diary.getImageIds().remove(id);
+
+                    // 이미지 ID 목록이 비어 있다면 다이어리를 삭제
+                    if (diary.getImageIds().isEmpty()) {
+                        diaryService.deleteDiaryAndImage(diary.getId(), loginUserDto.getMemberId());
+                    }
+                }
+
+
+                // 이미지 삭제가 성공한 경우에만 DB에서 데이터 삭제
+                clothesService.deleteClothes(id, loginUserDto.getMemberId());
+            } catch (IOException e) {
+                // 파일 삭제 실패 시 예외 처리
+                e.printStackTrace();
+                throw new RuntimeException("Failed to delete image and data.");
             }
-
-
-            // 이미지 삭제가 성공한 경우에만 DB에서 데이터 삭제
-            clothesService.deleteClothes(id, loginUserDto.getMemberId());
-        } catch (IOException e) {
-            // 파일 삭제 실패 시 예외 처리
-            e.printStackTrace();
-            throw new RuntimeException("Failed to delete image and data.");
         }
-    }
     }
 
 
@@ -200,8 +203,8 @@ public class ClothesController {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public byte[] getClothesImage(@IfLogin LoginUserDto loginUserDto,@PathVariable Long id) throws IOException {
         if (loginUserDto == null) {
-           throw new UnauthorizedException("로그인이 필요합니다.");
-      } else {
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        } else {
 
             Clothes clothes = clothesService.getClothes(id, loginUserDto.getMemberId());
             String imgpath = clothes.getImgpath();

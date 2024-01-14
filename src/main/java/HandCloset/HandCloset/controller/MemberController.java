@@ -75,7 +75,7 @@ public class MemberController {
 
 
         Member member = memberService.findByEmail(loginDto.getEmail());
-        if(!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())){
+        if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
 
@@ -141,12 +141,13 @@ public class MemberController {
         Member member = memberService.findByEmail(loginUserDto.getEmail());
         return new ResponseEntity(member, HttpStatus.OK);
     }
+
     @DeleteMapping("/{memberId}")
     public ResponseEntity deleteMember(@PathVariable Long memberId, @RequestBody RefreshTokenDto refreshTokenDto) {
         try {
             refreshTokenService.deleteRefreshToken(refreshTokenDto.getRefreshToken());
             memberManagementService.deleteMemberAndRelatedData(memberId);
-         
+
 
             return new ResponseEntity(HttpStatus.OK);
         } catch (EmptyResultDataAccessException e) {

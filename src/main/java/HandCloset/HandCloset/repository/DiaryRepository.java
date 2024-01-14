@@ -15,9 +15,13 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 //    List<Diary> findByIdAndMemberId(Long id, Long memberId);
 
     Optional<Diary> findByIdAndMember(Long id, Member member);
+
     List<Diary> findByMember(Member member);
+
     List<Diary> findAllByImageIdsContainingAndMember(Long imageId, Member member);
+
     void deleteByIdAndMember(Long id, Member member);
+
     List<Diary> findAllByImageIdsContaining(Long imageId);
 
     List<Diary> findAllByThumbnailpathAndMember(String thumbnailpath, Member member);

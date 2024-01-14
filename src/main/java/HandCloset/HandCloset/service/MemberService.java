@@ -20,7 +20,7 @@ public class MemberService {
     private final RoleRepository roleRepository;
 
 
-    public Member findByEmail(String email){
+    public Member findByEmail(String email) {
         return memberRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("해당 사용자가 없습니다."));
     }
 
@@ -33,11 +33,11 @@ public class MemberService {
     }
 
 
-    public Optional<Member> getMember(Long memberId){
+    public Optional<Member> getMember(Long memberId) {
         return memberRepository.findById(memberId);
     }
 
-//    @Transactional(readOnly = true)
+    //    @Transactional(readOnly = true)
 //    public Optional<Member> getMember(String email){
 //        return memberRepository.findByEmail(email);
 //    }

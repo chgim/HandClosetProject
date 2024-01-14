@@ -1,5 +1,6 @@
 
 package HandCloset.HandCloset.service;
+
 import HandCloset.HandCloset.entity.Diary;
 import HandCloset.HandCloset.entity.Member;
 import HandCloset.HandCloset.repository.MemberRepository;
@@ -12,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
+
 import org.springframework.transaction.annotation.Transactional;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,22 +45,24 @@ public class ClothesService {
         return clothesRepository.findByIdAndMember(id, member).orElse(null);
     }
 
-    public List<Clothes> getAllClothes( Long memberId) {
+    public List<Clothes> getAllClothes(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findByMember(member);
     }
+
     @Transactional
-    public void deleteClothes(Long id,Long memberId) {
+    public void deleteClothes(Long id, Long memberId) {
         try {
             Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
-            clothesRepository.deleteByIdAndMember(id,member);
+            clothesRepository.deleteByIdAndMember(id, member);
         } catch (EmptyResultDataAccessException e) {
             // 요청한 id에 해당하는 Clothes 엔티티가 존재하지 않는 경우
             throw new EntityNotFoundException("Clothes entity with id " + id + " does not exist.");
         }
     }
+
     @Transactional
-    public void deleteClothesAndImage(Long id,Long memberId) {
+    public void deleteClothesAndImage(Long id, Long memberId) {
         try {
             Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
             try {
@@ -76,12 +81,13 @@ public class ClothesService {
                 e.printStackTrace();
                 throw new RuntimeException("Failed to delete image and data.");
             }
-            clothesRepository.deleteByIdAndMember(id,member);
+            clothesRepository.deleteByIdAndMember(id, member);
         } catch (EmptyResultDataAccessException e) {
             // 요청한 id에 해당하는 Clothes 엔티티가 존재하지 않는 경우
             throw new EntityNotFoundException("Clothes entity with id " + id + " does not exist.");
         }
     }
+
     @Transactional
     public void deleteAllClothes(Long memberId) {
         try {
@@ -111,20 +117,21 @@ public class ClothesService {
     }
 
 
-    public List<Clothes> getClothesByCategory(String category,Long memberId) {
+    public List<Clothes> getClothesByCategory(String category, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
-        return clothesRepository.findByCategoryAndMember(category,member);
+        return clothesRepository.findByCategoryAndMember(category, member);
     }
 
-    public List<Clothes> getClothesBySubcategory(String subcategory,Long memberId) {
+    public List<Clothes> getClothesBySubcategory(String subcategory, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
-        return clothesRepository.findBySubcategoryAndMember(subcategory,member);
+        return clothesRepository.findBySubcategoryAndMember(subcategory, member);
     }
 
-    public List<Clothes> getClothesByCategoryAndSubcategory(String category, String subcategory,Long memberId) {
+    public List<Clothes> getClothesByCategoryAndSubcategory(String category, String subcategory, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
-        return clothesRepository.findByCategoryAndSubcategoryAndMember(category, subcategory,member);
+        return clothesRepository.findByCategoryAndSubcategoryAndMember(category, subcategory, member);
     }
+
     @Transactional
     public String saveImage(MultipartFile file, Long memberId) {
         try {
@@ -210,34 +217,43 @@ public class ClothesService {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.getRandomRecommendedClothes(subcategory, member);
     }
+
     @Transactional
-    public void updateWearCountAndCreateDateOnCreate(Long imageId, Date date, Long memberId) {
+    public void updateWearCountAndCreateDate(Long imageId, Date date, Long memberId, int wearCountModifier) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         Optional<Clothes> optionalClothes = clothesRepository.findByIdAndMember(imageId, member);
         optionalClothes.ifPresent(clothes -> {
-            clothes.setWearcnt(clothes.getWearcnt() + 1);
+            int updatedWearCount = clothes.getWearcnt() + wearCountModifier;
             Date existingCreatedate = clothes.getCreatedate();
+
             if (existingCreatedate == null || date.after(existingCreatedate)) {
-                clothes.setCreatedate(date); // 최근의 날짜인 경우에만 createdate를 업데이트 시킴
+                clothes.setCreatedate(date);
             }
+
+            clothes.setWearcnt(updatedWearCount);
             clothesRepository.save(clothes);
         });
     }
-    @Transactional
-    public void updateWearCountAndCreateDateOnDelete(Long imageId, Date date, Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
-        Optional<Clothes> optionalClothes = clothesRepository.findByIdAndMember(imageId, member);
-        optionalClothes.ifPresent(clothes -> {
-            clothes.setWearcnt(clothes.getWearcnt() - 1);
-            Date existingCreatedate = clothes.getCreatedate();
-            clothes.setCreatedate(date); // 최근의 날짜인 경우에만 createdate를 업데이트 시킴
 
-            clothesRepository.save(clothes);
-        });
+    public void updateWearCountAndCreateDateOnCreate(Long imageId, Date date, Long memberId) {
+        updateWearCountAndCreateDate(imageId, date, memberId, 1);
+    }
+
+    public void updateWearCountAndCreateDateOnDelete(Long imageId, Date date, Long memberId) {
+        updateWearCountAndCreateDate(imageId, date, memberId, -1);
     }
 
     public List<Clothes> getClothesByImageIds(List<Long> imageIds, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
         return clothesRepository.findByIdInAndMember(imageIds, member);
+    }
+
+    public boolean isImageUsedByOtherClothes(String imagePath, Long memberId, Long currentClothesId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        List<Clothes> clothesList = clothesRepository.findByImgpathAndMember(imagePath, member);
+
+        // 현재 Clothes 제외하고 다른 Clothes에서 사용 중인지 확인
+        return clothesList.stream()
+                .anyMatch(clothes -> !clothes.getId().equals(currentClothesId));
     }
 }
