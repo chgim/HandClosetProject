@@ -1,4 +1,5 @@
 package HandCloset.HandCloset.controller;
+
 import HandCloset.HandCloset.entity.Clothes;
 import HandCloset.HandCloset.entity.Diary;
 import HandCloset.HandCloset.security.jwt.util.IfLogin;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -22,12 +24,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.Map;
 import java.net.URLDecoder;
 import java.util.stream.Collectors;
+
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -41,22 +46,23 @@ public class ClothesController {
     private final DiaryService diaryService;
     private final MemberService memberService;
 
+
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public Clothes saveClothes(@RequestParam("file") MultipartFile file,
-                               @RequestParam("category") String category,
-                               @RequestParam("subcategory") String subcategory,
-                               @RequestParam("season") String season,
-                               @RequestParam(value = "description", required = false) String description,
-                               @RequestParam(value = "color", required = false) String color,
-                               @IfLogin LoginUserDto loginUserDto)
-    {
+    public ResponseEntity<Clothes> saveClothes(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("category") String category,
+            @RequestParam("subcategory") String subcategory,
+            @RequestParam("season") String season,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "color", required = false) String color,
+            @IfLogin LoginUserDto loginUserDto) {
+
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
             Clothes clothes = new Clothes();
-            MultipartFile processedImage = ImageProcessor.resizeImage(file,200,200);
+            MultipartFile processedImage = ImageProcessor.resizeImage(file, 200, 200);
             String imagePath = clothesService.saveImage(processedImage, loginUserDto.getMemberId());
 
             clothes.setImgpath(imagePath);
@@ -67,20 +73,21 @@ public class ClothesController {
             clothes.setColor(color);
             clothes.setMember(memberService.findMemberById(loginUserDto.getMemberId()));
 
-            return clothesService.saveClothes(clothes);
+            Clothes savedClothes = clothesService.saveClothes(clothes);
+            return new ResponseEntity<>(savedClothes, HttpStatus.CREATED);
         }
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public Clothes updateClothes(@PathVariable Long id,
-                                 @RequestParam(value = "category", required = false) String category,
-                                 @RequestParam(value = "subcategory", required = false) String subcategory,
-                                 @RequestParam(value = "season", required = false) String season,
-                                 @RequestParam(value = "description", required = false) String description,
-                                 @RequestParam(value = "color", required = false) String color,
-                                 @IfLogin LoginUserDto loginUserDto) {
-
+    public ResponseEntity<Clothes> updateClothes(
+            @PathVariable Long id,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "subcategory", required = false) String subcategory,
+            @RequestParam(value = "season", required = false) String season,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "color", required = false) String color,
+            @IfLogin LoginUserDto loginUserDto) {
 
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
@@ -94,20 +101,22 @@ public class ClothesController {
             clothes.setColor(color);
             clothes.setMember(memberService.findMemberById(loginUserDto.getMemberId()));
 
-
-            return clothesService.saveClothes(clothes);
+            Clothes updatedClothes = clothesService.saveClothes(clothes);
+            return ResponseEntity.ok(updatedClothes);
         }
-
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public Clothes getClothes(@IfLogin LoginUserDto loginUserDto,@PathVariable Long id) {
+    public ResponseEntity<Clothes> getClothes(
+            @IfLogin LoginUserDto loginUserDto,
+            @PathVariable Long id) {
+
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-
-            return clothesService.getClothes(id, loginUserDto.getMemberId());
+            Clothes clothes = clothesService.getClothes(id, loginUserDto.getMemberId());
+            return ResponseEntity.ok(clothes);
         }
     }
 
@@ -124,20 +133,21 @@ public class ClothesController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public List<Clothes> getAllClothes(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseEntity<List<Clothes>> getAllClothes(@IfLogin LoginUserDto loginUserDto) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            return clothesService.getAllClothes( loginUserDto.getMemberId());
+            List<Clothes> clothesList = clothesService.getAllClothes(loginUserDto.getMemberId());
+            return ResponseEntity.ok(clothesList);
         }
-
     }
 
     // ClothesDetail-삭제
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public void deleteClothes(@IfLogin LoginUserDto loginUserDto,@PathVariable Long id) {
+    public ResponseEntity<Void> deleteClothes(
+            @IfLogin LoginUserDto loginUserDto,
+            @PathVariable Long id) {
 
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
@@ -159,7 +169,7 @@ public class ClothesController {
                     Files.delete(imageFilePath);
                 }
 
-                List<Diary> referencingDiaries = diaryService.findDiariesByImageId(id,loginUserDto.getMemberId());
+                List<Diary> referencingDiaries = diaryService.findDiariesByImageId(id, loginUserDto.getMemberId());
                 for (Diary diary : referencingDiaries) {
                     diary.getImageIds().remove(id);
 
@@ -172,6 +182,7 @@ public class ClothesController {
 
                 // 이미지 삭제가 성공한 경우에만 DB에서 데이터 삭제
                 clothesService.deleteClothes(id, loginUserDto.getMemberId());
+                return ResponseEntity.noContent().build();
             } catch (IOException e) {
                 // 파일 삭제 실패 시 예외 처리
                 e.printStackTrace();
@@ -183,47 +194,56 @@ public class ClothesController {
 
     @GetMapping("/category")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public List<Clothes> getClothesByCategoryAndSubcategory(
+    public ResponseEntity<List<Clothes>> getClothesByCategoryAndSubcategory(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String subcategory,
             @IfLogin LoginUserDto loginUserDto) {
+
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
+            List<Clothes> result;
             if ("전체".equals(category)) {
-                return clothesService.getAllClothes( loginUserDto.getMemberId());
+                result = clothesService.getAllClothes(loginUserDto.getMemberId());
             } else {
-                return clothesService.getClothesByCategoryAndSubcategory(category, subcategory, loginUserDto.getMemberId());
+                result = clothesService.getClothesByCategoryAndSubcategory(category, subcategory, loginUserDto.getMemberId());
             }
+            return ResponseEntity.ok(result);
         }
     }
 
 
     @GetMapping(value = "/images/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public byte[] getClothesImage(@IfLogin LoginUserDto loginUserDto,@PathVariable Long id) throws IOException {
+    public ResponseEntity<byte[]> getClothesImage(
+            @IfLogin LoginUserDto loginUserDto,
+            @PathVariable Long id) throws IOException {
+
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-
             Clothes clothes = clothesService.getClothes(id, loginUserDto.getMemberId());
             String imgpath = clothes.getImgpath();
             Path imagePath = Paths.get(imgpath);
-            return Files.readAllBytes(imagePath);
-        }
+            byte[] imageBytes = Files.readAllBytes(imagePath);
 
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
+        }
     }
 
 
     @GetMapping("/ids")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public List<Long> getAllClothesIds(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseEntity<List<Long>> getAllClothesIds(@IfLogin LoginUserDto loginUserDto) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            return clothesService.getAllClothes( loginUserDto.getMemberId()).stream()
+            List<Long> clothesIds = clothesService.getAllClothes(loginUserDto.getMemberId())
+                    .stream()
                     .map(Clothes::getId)
                     .collect(Collectors.toList());
+
+            return ResponseEntity.ok(clothesIds);
         }
     }
 
@@ -234,7 +254,7 @@ public class ClothesController {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            Map<String, Integer> itemCountMap = clothesService.getCategoryItemCountForClothes( loginUserDto.getMemberId());
+            Map<String, Integer> itemCountMap = clothesService.getCategoryItemCountForClothes(loginUserDto.getMemberId());
             return ResponseEntity.ok(itemCountMap);
         }
     }
@@ -242,51 +262,51 @@ public class ClothesController {
 
     @GetMapping("/statistics")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public Map<String, Integer> getSeasonStatistics(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseEntity<Map<String, Integer>> getSeasonStatistics(@IfLogin LoginUserDto loginUserDto) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            return clothesService.getSeasonStatistics( loginUserDto.getMemberId());
+            Map<String, Integer> statistics = clothesService.getSeasonStatistics(loginUserDto.getMemberId());
+            return ResponseEntity.ok(statistics);
         }
     }
-
 
     @GetMapping("/top-items")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public List<Clothes> getTopItems(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseEntity<List<Clothes>> getTopItems(@IfLogin LoginUserDto loginUserDto) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            return clothesService.getTopItems( loginUserDto.getMemberId());
+            List<Clothes> topItems = clothesService.getTopItems(loginUserDto.getMemberId());
+            return ResponseEntity.ok(topItems);
         }
     }
-
 
     @GetMapping("/bottom-items")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public List<Clothes> getBottomItems(@IfLogin LoginUserDto loginUserDto) {
+    public ResponseEntity<List<Clothes>> getBottomItems(@IfLogin LoginUserDto loginUserDto) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            return clothesService.getBottomItems( loginUserDto.getMemberId());
+            List<Clothes> bottomItems = clothesService.getBottomItems(loginUserDto.getMemberId());
+            return ResponseEntity.ok(bottomItems);
         }
     }
-
 
     @GetMapping("/filter")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public List<Clothes> getFilteredClothes(@IfLogin LoginUserDto loginUserDto,@RequestParam String subcategory) {
+    public ResponseEntity<List<Clothes>> getFilteredClothes(@IfLogin LoginUserDto loginUserDto, @RequestParam String subcategory) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            return clothesService.getFilteredClothes(subcategory, loginUserDto.getMemberId());
+            List<Clothes> filteredClothes = clothesService.getFilteredClothes(subcategory, loginUserDto.getMemberId());
+            return ResponseEntity.ok(filteredClothes);
         }
     }
 
-
     @GetMapping("/recommendation")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public List<Clothes> getRecommendedClothes(@IfLogin LoginUserDto loginUserDto,@RequestParam("subcategories") List<String> subcategories) {
+    public ResponseEntity<List<Clothes>> getRecommendedClothes(@IfLogin LoginUserDto loginUserDto, @RequestParam("subcategories") List<String> subcategories) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
@@ -303,13 +323,13 @@ public class ClothesController {
                 recommendedClothes.addAll(clothes);
             }
 
-            return recommendedClothes;
+            return ResponseEntity.ok(recommendedClothes);
         }
     }
 
     @GetMapping("/recommendation2")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public List<Clothes> getRecommendedClothes2(@IfLogin LoginUserDto loginUserDto,@RequestParam("subcategories") List<String> subcategories) {
+    public ResponseEntity<List<Clothes>> getRecommendedClothes2(@IfLogin LoginUserDto loginUserDto, @RequestParam("subcategories") List<String> subcategories) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
@@ -326,12 +346,13 @@ public class ClothesController {
                 recommendedClothes.addAll(clothes);
             }
 
-            return recommendedClothes;
+            return ResponseEntity.ok(recommendedClothes);
         }
     }
+
     @GetMapping("/RandomRecommendation")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public List<Clothes> getRecommendedClothes4(@IfLogin LoginUserDto loginUserDto,@RequestParam("subcategories") List<String> subcategories) {
+    public ResponseEntity<List<Clothes>> getRecommendedClothes4(@IfLogin LoginUserDto loginUserDto, @RequestParam("subcategories") List<String> subcategories) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
@@ -347,13 +368,13 @@ public class ClothesController {
                 List<Clothes> clothes = clothesService.getRandomRecommendedClothes(decodedSubcategory, loginUserDto.getMemberId());
                 recommendedClothes.addAll(clothes);
             }
-            return recommendedClothes;
+            return ResponseEntity.ok(recommendedClothes);
         }
     }
 
     @GetMapping("/byImageIds")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<List<Clothes>> getClothesByImageIds(@IfLogin LoginUserDto loginUserDto,@RequestParam List<Long> imageIds) {
+    public ResponseEntity<List<Clothes>> getClothesByImageIds(@IfLogin LoginUserDto loginUserDto, @RequestParam List<Long> imageIds) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {

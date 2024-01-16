@@ -44,11 +44,19 @@ public class MemberController {
     private final MemberManagementService memberManagementService;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    // ResponseEntity는 Spring에서 HTTP 응답을 나타내는 클래스
+    // 클라이언트에게 전송할 응답 데이터와 HTTP 상태 코드를 함께 제공
+    // 이 클래스를 사용하는 이유는 다양한 HTTP 응답을 생성하고 클라이언트에게 전달할 수 있기 때문
+
+    // 회원 가입 엔드포인트
     @PostMapping("/signup")
     public ResponseEntity signup(@RequestBody @Valid MemberSignupDto memberSignupDto, BindingResult bindingResult) {
+        // 유효성 검사 실패 시 BAD_REQUEST 반환
+        // MemberSignupDto 객체에 대한 유효성 검사 결과
         if (bindingResult.hasErrors()) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
+        // MemberSignupDto를 Member 엔티티로 변환하여 저장
         Member member = new Member();
         member.setName(memberSignupDto.getName());
         member.setEmail(memberSignupDto.getEmail());
@@ -56,7 +64,7 @@ public class MemberController {
         member.setGender(memberSignupDto.getGender());
 
         Member saveMember = memberService.addMember(member);
-
+        // 회원 가입 성공 시 응답
         MemberSignupResponseDto memberSignupResponse = new MemberSignupResponseDto();
         memberSignupResponse.setMemberId(saveMember.getMemberId());
         memberSignupResponse.setName(saveMember.getName());
@@ -67,21 +75,22 @@ public class MemberController {
         return new ResponseEntity(memberSignupResponse, HttpStatus.CREATED);
     }
 
+    // 로그인 엔드포인트
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid MemberLoginDto loginDto, BindingResult bindingResult) {
+        // 유효성 검사 실패 시 BAD_REQUEST 반환
         if (bindingResult.hasErrors()) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
 
-
+        // 이메일로 회원 조회
         Member member = memberService.findByEmail(loginDto.getEmail());
+        // 비밀번호 검증
         if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-
+        // JWT 토큰 생성 및 응답
         List<String> roles = member.getRoles().stream().map(Role::getName).collect(Collectors.toList());
-
-
         String accessToken = jwtTokenizer.createAccessToken(member.getMemberId(), member.getEmail(), member.getName(), roles);
         String refreshToken = jwtTokenizer.createRefreshToken(member.getMemberId(), member.getEmail(), member.getName(), roles);
 
@@ -101,28 +110,38 @@ public class MemberController {
         return new ResponseEntity(loginResponse, HttpStatus.OK);
     }
 
+    // 로그아웃 엔드포인트
     @DeleteMapping("/logout")
     public ResponseEntity logout(@RequestBody RefreshTokenDto refreshTokenDto) {
+        // RefreshToken 삭제
         refreshTokenService.deleteRefreshToken(refreshTokenDto.getRefreshToken());
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    // RefreshToken을 이용하여 새로운 AccessToken을 발급하는 엔드포인트
     @PostMapping("/refreshToken")
     public ResponseEntity requestRefresh(@RequestBody RefreshTokenDto refreshTokenDto) {
+        // 주어진 RefreshToken 값으로 저장된 RefreshToken 엔티티를 찾음
         Optional<RefreshToken> optionalRefreshToken = refreshTokenService.findRefreshToken(refreshTokenDto.getRefreshToken());
 
+        // RefreshToken이 존재하는 경우
         if (optionalRefreshToken.isPresent()) {
+            // RefreshToken 엔티티를 가져옴
             RefreshToken refreshToken = optionalRefreshToken.get();
+            // RefreshToken에서 정보를 추출
             Claims claims = jwtTokenizer.parseRefreshToken(refreshToken.getValue());
 
+            // 추출한 정보에서 memberId를 얻어옴
             Long memberId = Long.valueOf((Integer) claims.get("memberId"));
+            // memberId를 사용하여 해당 멤버 정보를 데이터베이스에서 조회, 멤버가 없을 경우 예외를 던짐
             Member member = memberService.getMember(memberId).orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
+            // 추출한 정보에서 권한 정보를 얻어옴
             List<String> roles = (List) claims.get("roles");
-            String email = claims.getSubject();
+            // 새로운 AccessToken을 생성
+            String accessToken = jwtTokenizer.createAccessToken(memberId, claims.getSubject(), member.getName(), roles);
 
-            String accessToken = jwtTokenizer.createAccessToken(memberId, email, member.getName(), roles);
-
+            // 새로운 응답을 생성하여 반환
             MemberLoginResponseDto loginResponse = MemberLoginResponseDto.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshTokenDto.getRefreshToken())
@@ -132,16 +151,20 @@ public class MemberController {
 
             return new ResponseEntity(loginResponse, HttpStatus.OK);
         } else {
+            // RefreshToken이 유효하지 않거나 존재하지 않는 경우 UNAUTHORIZED 상태 코드 반환
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
     }
 
+    // 사용자 정보 조회 엔드포인트
     @GetMapping("/info")
     public ResponseEntity userinfo(@IfLogin LoginUserDto loginUserDto) {
+        // 로그인된 사용자 정보 조회
         Member member = memberService.findByEmail(loginUserDto.getEmail());
         return new ResponseEntity(member, HttpStatus.OK);
     }
 
+    // 회원 탈퇴 엔드포인트
     @DeleteMapping("/{memberId}")
     public ResponseEntity deleteMember(@PathVariable Long memberId, @RequestBody RefreshTokenDto refreshTokenDto) {
         try {
@@ -155,6 +178,7 @@ public class MemberController {
         }
     }
 
+    // 프로필 업데이트 엔드포인트
     @PutMapping("/update")
     public ResponseEntity<String> updateProfile(
             @RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
@@ -173,6 +197,7 @@ public class MemberController {
         }
     }
 
+    // 관리자 권한을 가진 사용자에게만 회원 목록 조회 엔드포인트
     @GetMapping("/getMemberList")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<Member>> getMemberList(@IfLogin LoginUserDto loginUserDto) {

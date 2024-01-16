@@ -1,4 +1,5 @@
 package HandCloset.HandCloset.controller;
+
 import HandCloset.HandCloset.entity.Diary;
 import HandCloset.HandCloset.security.jwt.util.IfLogin;
 import HandCloset.HandCloset.security.jwt.util.LoginUserDto;
@@ -7,7 +8,6 @@ import HandCloset.HandCloset.service.ClothesService;
 import HandCloset.HandCloset.service.DiaryService;
 import HandCloset.HandCloset.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,21 +38,19 @@ public class DiaryController {
     private final MemberService memberService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public Diary saveDiary(@RequestParam("file") MultipartFile file,
-                           @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date,
-                           @RequestParam("season") String season,
-                           @RequestParam("imageIds") String imageIds,
-                           @RequestParam(value = "note", required = false) String note,
-                           @IfLogin LoginUserDto loginUserDto) {
+    public ResponseEntity<Diary> saveDiary(@RequestParam("file") MultipartFile file,
+                                           @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date,
+                                           @RequestParam("season") String season,
+                                           @RequestParam("imageIds") String imageIds,
+                                           @RequestParam(value = "note", required = false) String note,
+                                           @IfLogin LoginUserDto loginUserDto) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
             List<Long> imageIdList = Arrays.stream(imageIds.split(","))
                     .map(Long::parseLong)
                     .collect(Collectors.toList());
-
 
             Diary diary = new Diary();
             String thumbnailPath = diaryService.saveThumbnail(file, loginUserDto.getMemberId());
@@ -64,18 +63,17 @@ public class DiaryController {
             Diary savedDiary = diaryService.saveDiary(diary);
 
             for (Long imageId : imageIdList) {
-                clothesService.updateWearCountAndCreateDateOnCreate(imageId, date,loginUserDto.getMemberId());
+                clothesService.updateWearCountAndCreateDateOnCreate(imageId, date, loginUserDto.getMemberId());
             }
 
-            return savedDiary;
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedDiary);
         }
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     @Transactional
-    public void deleteDiaryEntry(@IfLogin LoginUserDto loginUserDto, @PathVariable Long id) {
+    public ResponseEntity<String> deleteDiaryEntry(@IfLogin LoginUserDto loginUserDto, @PathVariable Long id) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
@@ -93,16 +91,16 @@ public class DiaryController {
                     System.out.println("Files.delete(thumbnailFilePath);");
                 }
 
-
                 diaryService.deleteDiary(id, loginUserDto.getMemberId());
                 System.out.println("diaryService.deleteDiary(id, loginUserDto.getMemberId());");
+
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Diary entry deleted successfully.");
             } catch (IOException e) {
                 e.printStackTrace();
-                throw new RuntimeException("Failed to delete image and data.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete image and data.");
             }
         }
     }
-
 
 
     @GetMapping("/count")
@@ -126,24 +124,25 @@ public class DiaryController {
             return new ResponseEntity<>(diaryEntries, HttpStatus.OK);
         }
     }
+
     @GetMapping("/entry")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<List<Diary>> getDiaryEntries(@IfLogin LoginUserDto loginUserDto,@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date) {
+    public ResponseEntity<List<Diary>> getDiaryEntries(@IfLogin LoginUserDto loginUserDto, @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            List<Diary> diaryEntries = diaryService.getDiaryEntriesByDate(date,loginUserDto.getMemberId());
+            List<Diary> diaryEntries = diaryService.getDiaryEntriesByDate(date, loginUserDto.getMemberId());
             return new ResponseEntity<>(diaryEntries, HttpStatus.OK);
         }
     }
 
     @GetMapping("/entryData/{id}")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<Diary> getDiaryEntry(@IfLogin LoginUserDto loginUserDto,@PathVariable Long id) {
+    public ResponseEntity<Diary> getDiaryEntry(@IfLogin LoginUserDto loginUserDto, @PathVariable Long id) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            Diary diary = diaryService.getDiaryEntryById(id,loginUserDto.getMemberId());
+            Diary diary = diaryService.getDiaryEntryById(id, loginUserDto.getMemberId());
             if (diary == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -153,7 +152,7 @@ public class DiaryController {
 
     @GetMapping(value = "/images")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<byte[]> getDiaryImage(@IfLogin LoginUserDto loginUserDto,@RequestParam String thumbnailpath) {
+    public ResponseEntity<byte[]> getDiaryImage(@IfLogin LoginUserDto loginUserDto, @RequestParam String thumbnailpath) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
@@ -170,11 +169,11 @@ public class DiaryController {
 
     @GetMapping("/entryData/{id}/imageIds")
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public ResponseEntity<List<Long>> getImageIdsByDiaryId(@IfLogin LoginUserDto loginUserDto,@PathVariable Long id) {
+    public ResponseEntity<List<Long>> getImageIdsByDiaryId(@IfLogin LoginUserDto loginUserDto, @PathVariable Long id) {
         if (loginUserDto == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         } else {
-            List<Long> imageIds = diaryService.getImageIdsByDiaryId(id,loginUserDto.getMemberId());
+            List<Long> imageIds = diaryService.getImageIdsByDiaryId(id, loginUserDto.getMemberId());
             return ResponseEntity.ok(imageIds);
         }
     }
