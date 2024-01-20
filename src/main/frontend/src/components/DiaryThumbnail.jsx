@@ -15,7 +15,7 @@ const DiaryThumbnail = ({ selectedDate }) => {
     if (!loginInfo || !loginInfo.accessToken) {
       navigate("/LoginForm");
     }
-  }, [loginInfo, navigate]);
+  }, []);
 
   const getImageSrc = async (thumbnailpath) => {
     try {
@@ -24,7 +24,7 @@ const DiaryThumbnail = ({ selectedDate }) => {
           Authorization: `Bearer ${loginInfo.accessToken}`,
         },
         params: {
-          thumbnailpath: decodeURIComponent(thumbnailpath), // 디코딩 추가
+          thumbnailpath: decodeURIComponent(thumbnailpath), 
         },
         responseType: "arraybuffer",
       });
@@ -55,8 +55,7 @@ const DiaryThumbnail = ({ selectedDate }) => {
           },
           params: {
             date: formattedDate,
-          },
-          data: { refreshToken: loginInfo.refreshToken },
+          }
         });
 
         if (response.data && response.data.length > 0) {
@@ -84,7 +83,7 @@ const DiaryThumbnail = ({ selectedDate }) => {
     <StyledDiaryThumbnail>
       {entryDataList.length > 0 ? (
         <div>
-          <hr /> {/* 위에 줄 */}
+          <hr /> 
           <ThumbnailGrid>
             {entryDataList.map((entryData, index) => (
               <ThumbnailItem
@@ -95,7 +94,7 @@ const DiaryThumbnail = ({ selectedDate }) => {
               </ThumbnailItem>
             ))}
           </ThumbnailGrid>
-          <hr /> {/* 아래 줄 */}
+          <hr /> 
         </div>
       ) : (
         <p style={{ marginTop: "43%", fontWeight:"bold", color:"#7a7a7a" }}>다이어리를 작성해 주세요!</p>

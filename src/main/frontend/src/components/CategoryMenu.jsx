@@ -6,6 +6,8 @@ import {
 } from "../utils/api";
 import {useNavigate} from "react-router-dom";
 import { useCallback } from "react";
+
+
 const categories = [
   {
     name: "전체",

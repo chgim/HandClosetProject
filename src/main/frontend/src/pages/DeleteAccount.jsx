@@ -21,8 +21,7 @@ const DeleteAccount = () => {
                     const response = await axios.get("/members/info", {
                         headers: {
                             Authorization: `Bearer ${loginInfo.accessToken}`,
-                        },
-                        data: { refreshToken: loginInfo.refreshToken },
+                        }
                     }); // 서버에서 사용자 정보 가져오기
                     console.log(response.data);
                     setUserName(response.data.name);
@@ -46,8 +45,7 @@ const DeleteAccount = () => {
             await axios.delete(`/members/${memberId}`, {
                 headers: {
                     Authorization: `Bearer ${loginInfo.accessToken}`,
-                },
-                data: { refreshToken: loginInfo.refreshToken },
+                }
             });
 
             // 로컬 스토리지에서 로그인 정보 삭제

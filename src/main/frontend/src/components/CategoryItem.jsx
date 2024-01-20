@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAllClothesIds } from "../utils/api"; // API 호출 함수 추가
+import { getAllClothesIds } from "../utils/api"; 
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -14,7 +14,7 @@ const CategoryItem = ({ category, subcategory, items }) => {
     if (!loginInfo || !loginInfo.accessToken) {
       navigate("/LoginForm");
     } else {
-      // 처음 렌더링될 때와 category가 변경될 때에만 호출
+  
       const fetchIds = async () => {
         try {
           const clothesIds = await getAllClothesIds();
@@ -56,7 +56,7 @@ const CategoryItem = ({ category, subcategory, items }) => {
           const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
           return URL.createObjectURL(blob);
         } else {
-          // index가 undefined일 경우에는 이미지를 가져오지 않음
+        
           return null;
         }
       } catch (error) {

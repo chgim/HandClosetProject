@@ -41,8 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequestMapping("/api/clothing")
 public class ClothesController {
-    private final ClothesService clothesService;
 
+    private final ClothesService clothesService;
     private final DiaryService diaryService;
     private final MemberService memberService;
 

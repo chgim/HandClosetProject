@@ -9,8 +9,7 @@ const getClothesByCategoryAndSubcategory = (category, subcategory) => {
   return axios.get(url, {
     headers: {
       Authorization: `Bearer ${loginInfo.accessToken}`,
-    },
-    data: { refreshToken: loginInfo.refreshToken },
+    }
   }).then((response) => {
     const clothesWithImageUrls = response.data.map((clothes) => ({
       ...clothes,
@@ -25,8 +24,7 @@ const getClothes = (id) => {
   return axios.get(`/api/clothing/${id}`, {
     headers: {
       Authorization: `Bearer ${loginInfo.accessToken}`,
-    },
-    data: { refreshToken: loginInfo.refreshToken },
+    }
   }).then((response) => {
     return response.data;
   });
@@ -39,8 +37,7 @@ const getAllClothesIds = () => {
   return axios.get("/api/clothing/ids", {
     headers: {
       Authorization: `Bearer ${loginInfo.accessToken}`,
-    },
-    data: { refreshToken: loginInfo.refreshToken },
+    }
   }).then((response) => {
     return response.data;
   });
@@ -51,8 +48,7 @@ const deleteClothes = (id) => {
   return axios.delete(`/api/clothing/${id}`, {
     headers: {
       Authorization: `Bearer ${loginInfo.accessToken}`,
-    },
-    data: { refreshToken: loginInfo.refreshToken },
+    }
   });
 };
 
@@ -63,8 +59,7 @@ const getClothesByImageIds = (imageIds) => {
       .get(`/api/clothing/byImageIds?imageIds=${imageIdQuery}`, {
         headers: {
           Authorization: `Bearer ${loginInfo.accessToken}`,
-        },
-        data: { refreshToken: loginInfo.refreshToken },
+        }
       })
       .then((response) => {
         const clothesWithImageUrls = response.data.map((clothes) => ({
