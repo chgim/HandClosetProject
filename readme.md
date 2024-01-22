@@ -4,7 +4,7 @@
 - 프로젝트 주제: 개인 옷장 시스템을 활용한 옷차림 추천 웹앱
 - 프로젝트 이름: Hand Closet
 - 개발 인원: 2명
-- 개발 기간: 2023.05.14~
+- 개발 기간: 2023.05.14~ 2023.12.14
 - Programing Languages: Java 11, Html5, Css3, Javascript
 - Framework/ Library: react, Spring Boot, Spring Security, JWT
 - Server: MySQL, Apache Tomcat, Redis
