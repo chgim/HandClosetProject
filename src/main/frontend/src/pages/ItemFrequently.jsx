@@ -145,7 +145,7 @@ const ItemFrequently = () => {
                 {item.description}
               </div>
               <div style={{ color: "gray" }}>
-                {moment(item.createdate).format("YYYY-MM-DD")} 등록 |{" "}
+                {moment(item.weardate).format("YYYY-MM-DD")} 등록 |{" "}
                 {item.wearcnt}회 착용
               </div>
             </ItemDetails>

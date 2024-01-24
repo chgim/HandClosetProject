@@ -160,7 +160,7 @@ function DiaryDetail() {
               <Elements>카테고리: {clothes.category}</Elements>
               <Elements>계절: {clothes.season}</Elements>
               <Elements>착용횟수: {clothes.wearcnt}회</Elements>
-              <Elements>최근 등록일: {formatDate(clothes.createdate)}</Elements>
+              <Elements>최근 등록일: {formatDate(clothes.weardate)}</Elements>
             </Details>
           </ClothesItem>
         </div>

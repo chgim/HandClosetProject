@@ -44,7 +44,7 @@ public class Clothes {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private Date createdate;
+    private Date weardate;
 
     @CreatedDate
     @Column(updatable = false, nullable = false)

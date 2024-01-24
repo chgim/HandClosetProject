@@ -194,7 +194,7 @@ public class ClothesService {
 
     public List<Clothes> getBottomItems(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
-        return clothesRepository.findTop5ByMemberOrderByCreatedateAsc(member);
+        return clothesRepository.findTop5ByMemberOrderByWeardateAsc(member);
     }
     ///
 
@@ -210,7 +210,7 @@ public class ClothesService {
 
     public List<Clothes> getRecommendedClothesAsc(String subcategory, Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException("Member not found"));
-        return clothesRepository.findTop2BySubcategoryAndMemberOrderByCreatedateAsc(subcategory, member);
+        return clothesRepository.findTop2BySubcategoryAndMemberOrderByWeardateAsc(subcategory, member);
     }
 
     public List<Clothes> getRandomRecommendedClothes(String subcategory, Long memberId) {
@@ -224,10 +224,10 @@ public class ClothesService {
         Optional<Clothes> optionalClothes = clothesRepository.findByIdAndMember(imageId, member);
         optionalClothes.ifPresent(clothes -> {
             int updatedWearCount = clothes.getWearcnt() + wearCountModifier;
-            Date existingCreatedate = clothes.getCreatedate();
+            Date existingCreatedate = clothes.getWeardate();
 
             if (existingCreatedate == null || date.after(existingCreatedate)) {
-                clothes.setCreatedate(date);
+                clothes.setWeardate(date);
             }
 
             clothes.setWearcnt(updatedWearCount);

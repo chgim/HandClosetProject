@@ -27,11 +27,11 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
 
     List<Clothes> findTop5ByMemberOrderByWearcntDesc(Member member);
 
-    List<Clothes> findTop5ByMemberOrderByCreatedateAsc(Member member);
+    List<Clothes> findTop5ByMemberOrderByWeardateAsc(Member member);
 
     List<Clothes> findTop2BySubcategoryAndMemberOrderByWearcntDesc(String subcategory, Member member);
 
-    List<Clothes> findTop2BySubcategoryAndMemberOrderByCreatedateAsc(String subcategory, Member member);
+    List<Clothes> findTop2BySubcategoryAndMemberOrderByWeardateAsc(String subcategory, Member member);
 
     List<Clothes> findByIdInAndMember(List<Long> ids, Member member);
 

@@ -143,7 +143,7 @@ const ItemNotRecently = () => {
                 {item.description}
               </div>
               <div style={{ color: "gray" }}>
-                {moment(item.createdate).format("YYYY-MM-DD")} 등록
+                {moment(item.weardate).format("YYYY-MM-DD")} 등록
               </div>
             </ItemDetails>
           </ItemCard>
