@@ -6,7 +6,7 @@
 - 개발 인원: 2명
 - 개발 기간: 2023.05.14~ 2023.12.14
 - Programing Languages: Java 11, Html5, Css3, Javascript
-- Framework/ Library: react, Spring Boot, Spring Security, JWT
+- Framework/ Library: React, Spring Boot, Spring Security, JWT
 - Server: MySQL, Apache Tomcat, Redis
 - Tooling/ DevOps: GitHub, IntelliJ IDEA, Visual Studio Code, Postman 
 - Api: OpenWeather, kakaomap
