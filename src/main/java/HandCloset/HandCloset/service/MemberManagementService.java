@@ -13,6 +13,7 @@ public class MemberManagementService {
     private final DiaryService diaryService;
     private final MemberService memberService;
 
+    // 회원탈퇴 or 회원 삭제(관리자)시 사용
     @Transactional
     public void deleteMemberAndRelatedData(Long memberId) {
         clothesService.deleteAllClothes(memberId);

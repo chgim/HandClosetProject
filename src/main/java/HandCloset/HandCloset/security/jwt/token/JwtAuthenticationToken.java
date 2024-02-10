@@ -12,12 +12,7 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     private Object principal; // 로그인한 사용자 id , email
     private Object credentials;
 
-    /**
-     * Creates a token with the supplied array of authorities.
-     *
-     * @param authorities the collection of <tt>GrantedAuthority</tt>s for the principal
-     *                    represented by this authentication object.
-     */
+
     public JwtAuthenticationToken(Collection<? extends GrantedAuthority> authorities,
                                   Object principal, Object credentials) {
         super(authorities);
@@ -40,5 +35,5 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     @Override
     public Object getPrincipal() {
         return this.principal;
-    } // 기존 코드를 수정
+    }
 }

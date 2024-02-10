@@ -51,8 +51,8 @@ public class MemberController {
     // 회원 가입 엔드포인트
     @PostMapping("/signup")
     public ResponseEntity signup(@RequestBody @Valid MemberSignupDto memberSignupDto, BindingResult bindingResult) {
-        // 유효성 검사 실패 시 BAD_REQUEST 반환
         // MemberSignupDto 객체에 대한 유효성 검사 결과
+        // 유효성 검사 실패 시 BAD_REQUEST 반환
         if (bindingResult.hasErrors()) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
@@ -75,7 +75,21 @@ public class MemberController {
         return new ResponseEntity(memberSignupResponse, HttpStatus.CREATED);
     }
 
-    // 로그인 엔드포인트
+
+    /*
+    로그인 엔드포인트
+
+    @RequestBody:
+    HTTP 요청의 body 부분을 Java 객체로 매핑할 때 사용.
+    클라이언트가 JSON이나 XML 형식으로 데이터를 전송할 때, 이를 Java 객체로 변환.
+    MemberLoginDto loginDto에 붙어 있으므로, 클라이언트에서 전송한 JSON 또는 XML 데이터를 MemberLoginDto 객체로 변환.
+
+    @Valid:
+    Bean Validation(Java Validation API)을 통한 객체의 유효성 검사를 수행할 때 사용.
+    MemberLoginDto에 유효성 검사(annotation 기반)를 정의하고, @Valid를 사용하여 해당 검사를 활성화.
+    BindingResult bindingResult는 유효성 검사 결과를 저장, 이를 통해 검사 실패 시 추가적인 처리.
+    만약 유효성 검사에 실패하면, HttpStatus.BAD_REQUEST 상태 코드와 함께 응답을 보내어 클라이언트에게 유효하지 않은 입력을 알림.
+    */
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid MemberLoginDto loginDto, BindingResult bindingResult) {
         // 유효성 검사 실패 시 BAD_REQUEST 반환
@@ -85,12 +99,13 @@ public class MemberController {
 
         // 이메일로 회원 조회
         Member member = memberService.findByEmail(loginDto.getEmail());
-        // 비밀번호 검증
+        // passwordEncoder의 matchers를 이용하여 암호 검사
         if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        // JWT 토큰 생성 및 응답
+        // List<Role> => List<String>
         List<String> roles = member.getRoles().stream().map(Role::getName).collect(Collectors.toList());
+        // JWT 토큰 생성 및 응답
         String accessToken = jwtTokenizer.createAccessToken(member.getMemberId(), member.getEmail(), member.getName(), roles);
         String refreshToken = jwtTokenizer.createRefreshToken(member.getMemberId(), member.getEmail(), member.getName(), roles);
 
@@ -113,7 +128,7 @@ public class MemberController {
     // 로그아웃 엔드포인트
     @DeleteMapping("/logout")
     public ResponseEntity logout(@RequestBody RefreshTokenDto refreshTokenDto) {
-        // RefreshToken 삭제
+        // RefreshToken 삭제(클라이언트는 스스로 가지고 있는 access token, refresh token 삭제)
         refreshTokenService.deleteRefreshToken(refreshTokenDto.getRefreshToken());
         return new ResponseEntity(HttpStatus.OK);
     }

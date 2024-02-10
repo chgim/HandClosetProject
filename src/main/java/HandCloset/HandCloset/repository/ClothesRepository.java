@@ -35,6 +35,7 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
 
     List<Clothes> findByIdInAndMember(List<Long> ids, Member member);
 
+    // 일반 SQL에서는 ORDER BY RAND()를 사용하여 랜덤한 순서로 결과를 정렬할 수 있지만, JPQL에서는 RAND() 함수를 직접 지원하지 않음. 따라서 FUNCTION('RAND')을 사용하여 랜덤한 순서로 정렬
     @Query("SELECT c FROM Clothes c WHERE c.subcategory = :subcategory AND c.member = :memberId ORDER BY FUNCTION('RAND')")
     List<Clothes> getRandomRecommendedClothes(@Param("subcategory") String subcategory, @Param("memberId") Member member);
 

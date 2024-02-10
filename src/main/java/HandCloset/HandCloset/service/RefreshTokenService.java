@@ -22,6 +22,7 @@ public class RefreshTokenService {
 
     @Transactional
     public RefreshToken addRefreshToken(RefreshToken refreshToken) {
+        // DB에 저장
         RefreshToken savedToken = refreshTokenRepository.save(refreshToken);
 
         // Redis에 저장
